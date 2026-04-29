@@ -8,7 +8,7 @@ ProTrack is an integrated software solution designed to automate production work
 ## 🎯 General Objective
 To develop a digital system that automates production operations and tracks product movement throughout the supply chain, ensuring quality, transparency, and efficiency.
 
----
+
 
 ## 🎯 Specific Objectives
 - Automate task scheduling and process logging within the production line  
