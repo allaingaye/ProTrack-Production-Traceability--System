@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Boxicons -->
+  <link href='https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css' rel='stylesheet'>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Poppins:wght@400;500;600;700&display=swap');
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    a {
+        text-decoration: none;
+    }
+
+    li {
+        list-style: none;
+    }
+
+    :root {
+        --poppins: 'Poppins', sans-serif;
+        --lato: 'Lato', sans-serif;
+        --light: #F9F9F9;
+        --blue: #2D4F2B;
+        --light-blue: #E8F5E9;
+        --grey: #eee;
+        --dark-grey: #AAAAAA;
+        --dark: #342E37;
+        --red: #DB504A;
+        --yellow: #FFCE26;
+        --light-yellow: #FFF2C6;
+        --orange: #FD7238;
+        --light-orange: #FFE0D3;
+    }
+
+    html {
+        overflow-x: hidden;
+    }
+
+    body.dark {
+        --light: #0C0C1E;
+        --grey: #060714;
+        --dark: #FBFBFB;
+    }
+
+    body {
+        background: var(--grey);
+        overflow-x: hidden;
+    }
+
+    /* SIDEBAR */
+    #sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 280px;
+        height: 100%;
+        background: var(--light);
+        z-index: 2000;
+        font-family: var(--lato);
+        transition: .3s ease;
+        overflow-x: hidden;
+        scrollbar-width: none;
+    }
+    #sidebar::--webkit-scrollbar {
+        display: none;
+    }
+    #sidebar.hide {
+        width: 60px;
+    }
+    #sidebar .brand {
+        font-size: 24px;
+        font-weight: 700;
+        height: 56px;
+        display: flex;
+        align-items: center;
+        color: var(--blue);
+        position: sticky;
+        top: 0;
+        left: 0;
+        background: var(--light);
+        z-index: 500;
+        padding-bottom: 20px;
+        box-sizing: content-box;
+    }
+    #sidebar .brand .bx {
+        min-width: 60px;
+        display: flex;
+        justify-content: center;
+    }
+    #sidebar .side-menu {
+        width: 100%;
+        margin-top: 48px;
+    }
+    #sidebar .side-menu li {
+        height: 48px;
+        background: transparent;
+        margin-left: 6px;
+        border-radius: 48px 0 0 48px;
+        padding: 4px;
+    }
+    #sidebar .side-menu li.active {
+        background: var(--grey);
+        position: relative;
+    }
+    #sidebar .side-menu li.active::before {
+        content: '';
+        position: absolute;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        top: -40px;
+        right: 0;
+        box-shadow: 20px 20px 0 var(--grey);
+        z-index: -1;
+    }
+    #sidebar .side-menu li.active::after {
+        content: '';
+        position: absolute;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        bottom: -40px;
+        right: 0;
+        box-shadow: 20px -20px 0 var(--grey);
+        z-index: -1;
+    }
+    #sidebar .side-menu li a {
+        width: 100%;
+        height: 100%;
+        background: var(--light);
+        display: flex;
+        align-items: center;
+        border-radius: 48px;
+        font-size: 16px;
+        color: var(--dark);
+        white-space: nowrap;
+        overflow-x: hidden;
+    }
+    #sidebar .side-menu.top li.active a {
+        color: var(--blue);
+    }
+    #sidebar.hide .side-menu li a {
+        width: calc(48px - (4px * 2));
+        transition: width .3s ease;
+    }
+    #sidebar .side-menu li a.logout {
+        color: var(--red);
+    }
+    #sidebar .side-menu.top li a:hover {
+        color: var(--blue);
+    }
+    #sidebar .side-menu li a .bx {
+        min-width: calc(60px  - ((4px + 6px) * 2));
+        display: flex;
+        justify-content: center;
+    }
+
+    /* CONTENT */
+    #content {
+        position: relative;
+        width: calc(100% - 280px);
+        left: 280px;
+        transition: .3s ease;
+    }
+    #sidebar.hide ~ #content {
+        width: calc(100% - 60px);
+        left: 60px;
+    }
+
+    /* NAVBAR */
+    #content nav {
+        height: 56px;
+        background: var(--light);
+        padding: 0 24px;
+        display: flex;
+        align-items: center;
+        grid-gap: 24px;
+        font-family: var(--lato);
+        position: sticky;
+        top: 0;
+        left: 0;
+        z-index: 1000;
+    }
+    #content nav::before {
+        content: '';
+        position: absolute;
+        width: 40px;
+        height: 40px;
+        bottom: -40px;
+        left: 0;
+        border-radius: 50%;
+        box-shadow: -20px -20px 0 var(--light);
+    }
+    #content nav a {
+        color: var(--dark);
+    }
+    #content nav .bx.bx-menu {
+        cursor: pointer;
+        color: var(--dark);
+    }
+    #content nav .nav-link {
+        font-size: 16px;
+        transition: .3s ease;
+    }
+    #content nav .nav-link:hover {
+        color: var(--blue);
+    }
+    #content nav form {
+        max-width: 400px;
+        width: 100%;
+        margin-right: auto;
+    }
+    #content nav form .form-input {
+        display: flex;
+        align-items: center;
+        height: 36px;
+    }
+    #content nav form .form-input input {
+        flex-grow: 1;
+        padding: 0 16px;
+        height: 100%;
+        border: none;
+        background: var(--grey);
+        border-radius: 36px 0 0 36px;
+        outline: none;
+        width: 100%;
+        color: var(--dark);
+    }
+    #content nav form .form-input button {
+        width: 36px;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: var(--blue);
+        color: var(--light);
+        font-size: 18px;
+        border: none;
+        outline: none;
+        border-radius: 0 36px 36px 0;
+        cursor: pointer;
+    }
+    #content nav .switch-mode {
+        display: block;
+        min-width: 50px;
+        height: 25px;
+        border-radius: 25px;
+        background: var(--grey);
+        cursor: pointer;
+        position: relative;
+    }
+    #content nav .switch-mode::before {
+        content: '';
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        bottom: 2px;
+        width: calc(25px - 4px);
+        background: var(--blue);
+        border-radius: 50%;
+        transition: all .3s ease;
+    }
+    #content nav #switch-mode:checked + .switch-mode::before {
+        left: calc(100% - (25px - 4px) - 2px);
+    }
+
+    /* User Profile in Navbar */
+    #content nav .user-profile {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-left: auto;
+        padding: 6px 12px;
+        border-radius: 20px;
+        background: var(--grey);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    #content nav .user-profile:hover {
+        background: var(--light-blue);
+    }
+
+    #content nav .user-profile .user-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--blue);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    #content nav .user-profile .user-email {
+        font-size: 14px;
+        color: var(--dark);
+        font-weight: 500;
+    }
+
+    /* MAIN */
+    #content main {
+        width: 100%;
+        padding: 36px 24px;
+        font-family: var(--poppins);
+        max-height: calc(100vh - 56px);
+        overflow-y: auto;
+    }
+    #content main .head-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        grid-gap: 16px;
+        flex-wrap: wrap;
+    }
+    #content main .head-title .left h1 {
+        font-size: 36px;
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: var(--blue);
+    }
+    #content main .head-title .left .breadcrumb {
+        display: flex;
+        align-items: center;
+        grid-gap: 16px;
+    }
+    #content main .head-title .left .breadcrumb li {
+        color: var(--dark);
+    }
+    #content main .head-title .left .breadcrumb li a {
+        color: var(--dark-grey);
+        pointer-events: none;
+    }
+    #content main .head-title .left .breadcrumb li a.active {
+        color: var(--blue);
+        pointer-events: unset;
+    }
+
+    /* Assigned Stages Styles */
+    .stages-container {
+        margin-top: 30px;
+    }
+
+    .stages-section {
+        background: var(--light);
+        border-radius: 20px;
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .stages-section h3 {
+        color: var(--blue);
+        font-size: 20px;
+        margin-bottom: 20px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .user-input-section {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .user-input-section input {
+        padding: 12px 16px;
+        border: 1px solid var(--grey);
+        border-radius: 8px;
+        font-family: var(--poppins);
+        font-size: 14px;
+        color: var(--dark);
+        background: var(--grey);
+        outline: none;
+        transition: all 0.3s ease;
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .user-input-section input:focus {
+        border-color: var(--blue);
+        background: var(--light);
+    }
+
+    .btn {
+        padding: 12px 24px;
+        cursor: pointer;
+        border: none;
+        border-radius: 8px;
+        font-family: var(--poppins);
+        font-weight: 500;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-load {
+        background: var(--blue);
+        color: white;
+    }
+
+    .btn-load:hover {
+        background: #234020;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(45, 79, 43, 0.3);
+    }
+
+    .stages-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    .stages-table th,
+    .stages-table td {
+        padding: 14px 12px;
+        text-align: left;
+        border-bottom: 1px solid var(--grey);
+    }
+
+    .stages-table th {
+        background: var(--blue);
+        color: white;
+        font-weight: 600;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        position: sticky;
+        top: 0;
+    }
+
+    .stages-table tbody tr {
+        transition: background 0.3s ease;
+    }
+
+    .stages-table tbody tr:hover {
+        background: var(--grey);
+    }
+
+    .stages-table td {
+        color: var(--dark);
+        font-size: 14px;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 6px 14px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-pending {
+        background: var(--light-orange);
+        color: var(--orange);
+    }
+
+    .status-in-progress {
+        background: var(--light-yellow);
+        color: var(--yellow);
+    }
+
+    .status-completed {
+        background: var(--light-blue);
+        color: var(--blue);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--dark-grey);
+    }
+
+    .empty-state i {
+        font-size: 64px;
+        margin-bottom: 16px;
+        opacity: 0.5;
+    }
+
+    .empty-state h3 {
+        font-size: 20px;
+        margin-bottom: 8px;
+        color: var(--dark);
+    }
+
+    .empty-state p {
+        font-size: 14px;
+    }
+
+    .error-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--red);
+    }
+
+    .error-state i {
+        font-size: 64px;
+        margin-bottom: 16px;
+    }
+
+    /* Notification Styles */
+    .notification {
+        position: fixed;
+        top: 80px;
+        right: 24px;
+        padding: 16px 24px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-family: var(--poppins);
+        font-weight: 500;
+        font-size: 14px;
+        z-index: 4000;
+        animation: slideInRight 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .notification.success {
+        background: var(--light-blue);
+        color: var(--blue);
+        border: 1px solid var(--blue);
+    }
+
+    .notification.error {
+        background: #ffebee;
+        color: var(--red);
+        border: 1px solid var(--red);
+    }
+
+    .notification i {
+        font-size: 20px;
+    }
+
+    @keyframes slideInRight {
+        from {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes slideOutRight {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+    }
+
+    @media screen and (max-width: 768px) {
+        #sidebar {
+            width: 200px;
+        }
+
+        #content {
+            width: calc(100% - 60px);
+            left: 200px;
+        }
+
+        #content nav .nav-link {
+            display: none;
+        }
+
+        #content nav .user-profile .user-email {
+            display: none;
+        }
+
+        .user-input-section {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .user-input-section input,
+        .btn {
+            width: 100%;
+        }
+    }
+
+    @media screen and (max-width: 576px) {
+        #content nav form .form-input input {
+            display: none;
+        }
+
+        #content nav form .form-input button {
+            width: auto;
+            height: auto;
+            background: transparent;
+            border-radius: none;
+            color: var(--dark);
+        }
+
+        #content nav form.show .form-input input {
+            display: block;
+            width: 100%;
+        }
+        #content nav form.show .form-input button {
+            width: 36px;
+            height: 100%;
+            border-radius: 0 36px 36px 0;
+            color: var(--light);
+            background: var(--red);
+        }
+
+        #content nav form.show ~ .notification,
+        #content nav form.show ~ .profile {
+            display: none;
+        }
+
+        .stages-table {
+            font-size: 12px;
+        }
+
+        .stages-table th,
+        .stages-table td {
+            padding: 10px 6px;
+        }
+    }
+  </style>
+
+  <title>Production Stages - OperatorHub</title>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<section id="sidebar">
+  <a href="#" class="brand">
+    <i class='bx bxs-factory'></i>
+    <span class="text">Operator Hub</span>
+  </a>
+
+  <ul class="side-menu top">
+    <li><a href="operator.html"><i class='bx bxs-dashboard'></i><span class="text">Dashboard</span></a></li>
+    <li><a href="opraw.html"><i class='bx bx-package'></i><span class="text">Raw Material</span></a></li>
+    <li><a href="opmat.html"><i class='bx bx-download'></i><span class="text">Material Intake</span></a></li>
+    <li><a href="opconsum.html"><i class='bx bx-upload'></i><span class="text">Material Consumption</span></a></li>
+    <li class="active"><a href="opstage.html"><i class='bx bx-git-branch'></i><span class="text">Production Stage</span></a></li>
+    <li><a href="oprtask.html"><i class='bx bx-task'></i><span class="text">Production Task</span></a></li>
+    <li><a href="oprbatch.html"><i class='bx bx-grid-alt'></i><span class="text">Production Batch</span></a></li>
+    <li><a href="opproduct.html"><i class='bx bx-cube'></i><span class="text">Product</span></a></li>
+    <li> <a href="opqccheck.html"><i class='bx bx-check-shield'></i><span class="text">QC Checkpoint</span></a></li>
+<!--    <li><a href="opaudit.html"><i class='bx bx-history'></i><span class="text">Audit Log</span></a></li>-->
+    <li><a href="try.html"><i class='bx bxs-bar-chart-alt-2'></i><span class="text">Statistiques</span></a></li>
+  </ul>
+
+  <ul class="side-menu">
+    <li>
+      <a href="index.html" class="logout">
+        <i class='bx bxs-log-out-circle'></i>
+        <span class="text">Logout</span>
+      </a>
+    </li>
+  </ul>
+</section>
+<!-- SIDEBAR -->
+
+<!-- CONTENT -->
+<section id="content">
+  <!-- NAVBAR -->
+  <nav>
+    <i class='bx bx-menu'></i>
+    <a href="#" class="nav-link">Categories</a>
+    <form action="#">
+      <div class="form-input">
+        <input type="search" placeholder="Search...">
+        <button type="submit" class="search-btn"><i class='bx bx-search'></i></button>
+      </div>
+    </form>
+
+    <!-- User Profile Section -->
+    <div class="user-profile" id="userProfile">
+      <div class="user-avatar" id="userAvatar">U</div>
+      <div class="user-email" id="userEmail">user@example.com</div>
+    </div>
+
+    <input type="checkbox" id="switch-mode" hidden>
+    <label for="switch-mode" class="switch-mode"></label>
+  </nav>
+  <!-- NAVBAR -->
+
+  <!-- MAIN -->
+  <main>
+    <div class="head-title">
+      <div class="left">
+        <h1>Production Stages</h1>
+        <ul class="breadcrumb">
+          <li>
+            <a href="#">Dashboard</a>
+          </li>
+          <li><i class='bx bx-chevron-right'></i></li>
+          <li>
+            <a class="active" href="#">Production Stages</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="stages-container">
+      <!-- Production Stages List -->
+      <div class="stages-section">
+        <h3><i class='bx bx-list-check'></i> All Production Stages</h3>
+        <div style="overflow-x: auto;">
+          <table class="stages-table">
+            <thead>
+            <tr>
+              <th>ID</th>
+              <th>Stage Name</th>
+              <th>Description</th>
+              <th>Order</th>
+            </tr>
+            </thead>
+            <tbody id="stagesBody">
+            <tr>
+              <td colspan="4">
+                <div class="empty-state">
+                  <i class='bx bx-loader-alt bx-spin'></i>
+                  <h3>Loading Stages...</h3>
+                  <p>Fetching production stages from the server</p>
+                </div>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- User Assigned Stages Section -->
+      <div class="stages-section">
+        <h3><i class='bx bx-user-check'></i> My Assigned Tasks</h3>
+
+        <!-- User ID Input -->
+        <div class="user-input-section" style="margin-bottom: 20px;">
+          <input type="number" id="userId" placeholder="Enter Your User ID" value="1" />
+          <button class="btn btn-load" onclick="fetchAssignedTasks()">
+            <i class='bx bx-refresh'></i> Load My Tasks
+          </button>
+        </div>
+
+        <!-- Assigned Tasks Table -->
+        <div style="overflow-x: auto;">
+          <table class="stages-table">
+            <thead>
+            <tr>
+              <th>Task ID</th>
+              <th>Stage</th>
+              <th>Batch</th>
+              <th>Status</th>
+              <th>Start Time</th>
+              <th>End Time</th>
+            </tr>
+            </thead>
+            <tbody id="assignedTasksBody">
+            <tr>
+              <td colspan="6">
+                <div class="empty-state">
+                  <i class='bx bx-info-circle'></i>
+                  <h3>No Tasks Loaded</h3>
+                  <p>Enter your User ID and click "Load My Tasks" to view your assigned tasks</p>
+                </div>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+  <!-- MAIN -->
+</section>
+<!-- CONTENT -->
+
+<script>
+  // ===== USER MANAGEMENT =====
+  // Get user from localStorage or use default
+  function getCurrentUser() {
+    const savedUser = localStorage.getItem('currentUser');
+    if (savedUser) {
+      return JSON.parse(savedUser);
+    }
+
+    const defaultUser = {
+      id: 1,
+      name: "John Operator",
+      email: "john.operator@factory.com",
+      role: "operator",
+      avatarLetter: "J"
+    };
+
+    localStorage.setItem('currentUser', JSON.stringify(defaultUser));
+    return defaultUser;
+  }
+
+  // Display user information
+  function displayUserInfo() {
+    const user = getCurrentUser();
+    document.getElementById('userEmail').textContent = user.email;
+    document.getElementById('userAvatar').textContent = user.avatarLetter;
+
+    const userProfile = document.getElementById('userProfile');
+    userProfile.title = `${user.name}\n${user.email}\nRole: ${user.role}`;
+  }
+
+  // ===== NOTIFICATION SYSTEM =====
+  function showNotification(message, type) {
+    const existingNotif = document.querySelector('.notification');
+    if (existingNotif) {
+      existingNotif.remove();
+    }
+
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.innerHTML = `
+      <i class='bx ${type === 'success' ? 'bx-check-circle' : 'bx-error-circle'}'></i>
+      <span>${message}</span>
+    `;
+
+    document.body.appendChild(notification);
+
+    // Auto remove after 4 seconds
+    setTimeout(() => {
+      notification.style.animation = 'slideOutRight 0.3s ease';
+      setTimeout(() => notification.remove(), 300);
+    }, 4000);
+  }
+
+  // ===== API ENDPOINTS =====
+  const STAGES_API = "http://localhost:1010/api/v1/stages";
+  const TASKS_API = "http://localhost:1010/api/v1/tasks";
+
+  // ===== SIDEBAR FUNCTIONALITY =====
+  const allSideMenu = document.querySelectorAll('#sidebar .side-menu.top li a');
+  allSideMenu.forEach(item => {
+      const li = item.parentElement;
+      item.addEventListener('click', function () {
+          allSideMenu.forEach(i => {
+              i.parentElement.classList.remove('active');
+          })
+          li.classList.add('active');
+      })
+  });
+
+  // Toggle sidebar
+  const menuBar = document.querySelector('#content nav .bx.bx-menu');
+  const sidebar = document.getElementById('sidebar');
+  menuBar.addEventListener('click', function () {
+      sidebar.classList.toggle('hide');
+  })
+
+  // Search button
+  const searchButton = document.querySelector('#content nav form .form-input button');
+  const searchButtonIcon = document.querySelector('#content nav form .form-input button .bx');
+  const searchForm = document.querySelector('#content nav form');
+
+  searchButton.addEventListener('click', function (e) {
+      if (window.innerWidth < 576) {
+          e.preventDefault();
+          searchForm.classList.toggle('show');
+          if (searchForm.classList.contains('show')) {
+              searchButtonIcon.classList.replace('bx-search', 'bx-x');
+          } else {
+              searchButtonIcon.classList.replace('bx-x', 'bx-search');
+          }
+      }
+  })
+
+  if (window.innerWidth < 768) {
+      sidebar.classList.add('hide');
+  } else if (window.innerWidth > 576) {
+      searchButtonIcon.classList.replace('bx-x', 'bx-search');
+      searchForm.classList.remove('show');
+  }
+
+  window.addEventListener('resize', function () {
+      if (this.innerWidth > 576) {
+          searchButtonIcon.classList.replace('bx-x', 'bx-search');
+          searchForm.classList.remove('show');
+      }
+  })
+
+  // Dark mode toggle
+  const switchMode = document.getElementById('switch-mode');
+  switchMode.addEventListener('change', function () {
+      if (this.checked) {
+          document.body.classList.add('dark');
+      } else {
+          document.body.classList.remove('dark');
+      }
+  })
+
+  // ===== PRODUCTION STAGES FUNCTIONALITY =====
+  async function loadProductionStages() {
+      const tbody = document.getElementById('stagesBody');
+
+      try {
+          const res = await fetch(STAGES_API);
+
+          if (!res.ok) {
+              throw new Error(`HTTP error! status: ${res.status}`);
+          }
+
+          const stages = await res.json();
+
+          if (!stages || stages.length === 0) {
+              tbody.innerHTML = `
+                  <tr>
+                      <td colspan="4">
+                          <div class="empty-state">
+                              <i class='bx bx-info-circle'></i>
+                              <h3>No Stages Found</h3>
+                              <p>There are no production stages defined in the system</p>
+                          </div>
+                      </td>
+                  </tr>
+              `;
+              return;
+          }
+
+          tbody.innerHTML = '';
+          stages.forEach(stage => {
+              const row = `
+                  <tr>
+                      <td>${stage.id}</td>
+                      <td><strong>${stage.name || 'N/A'}</strong></td>
+                      <td>${stage.description || 'No description'}</td>
+                      <td>${stage.stageOrder || '0'}</td>
+                  </tr>
+              `;
+              tbody.innerHTML += row;
+          });
+
+          showNotification('Production stages loaded successfully', 'success');
+
+      } catch (error) {
+          console.error('Error fetching production stages:', error);
+          tbody.innerHTML = `
+              <tr>
+                  <td colspan="4">
+                      <div class="error-state">
+                          <i class='bx bx-error'></i>
+                          <h3>Error Loading Stages</h3>
+                          <p>${error.message}</p>
+                      </div>
+                  </td>
+              </tr>
+          `;
+          showNotification('Error loading production stages', 'error');
+      }
+  }
+
+  // ===== ASSIGNED TASKS FUNCTIONALITY =====
+  function getStatusClass(status) {
+      if (!status) return 'status-pending';
+
+      const statusUpper = status.toUpperCase();
+      if (statusUpper.includes('COMPLETED') || statusUpper.includes('DONE') || statusUpper.includes('FINISHED')) {
+          return 'status-completed';
+      } else if (statusUpper.includes('PROGRESS') || statusUpper.includes('ACTIVE') || statusUpper.includes('STARTED')) {
+          return 'status-in-progress';
+      } else {
+          return 'status-pending';
+      }
+  }
+
+  async function fetchAssignedTasks() {
+      const userId = document.getElementById('userId').value;
+      const tbody = document.getElementById('assignedTasksBody');
+
+      if (!userId) {
+          tbody.innerHTML = `
+              <tr>
+                  <td colspan="6">
+                      <div class="error-state">
+                          <i class='bx bx-error-circle'></i>
+                          <h3>User ID Required</h3>
+                          <p>Please enter your User ID to load your assigned tasks</p>
+                      </div>
+                  </td>
+              </tr>
+          `;
+          showNotification('Please enter your User ID', 'error');
+          return;
+      }
+
+      // Show loading state
+      tbody.innerHTML = `
+          <tr>
+              <td colspan="6">
+                  <div class="empty-state">
+                      <i class='bx bx-loader-alt bx-spin'></i>
+                      <h3>Loading...</h3>
+                      <p>Fetching your assigned tasks</p>
+                  </div>
+              </td>
+          </tr>
+      `;
+
+      try {
+          // Note: This endpoint might not exist in your backend
+          // You need to create a TaskController with this endpoint
+          const res = await fetch(`${TASKS_API}/user/${userId}`);
+
+          if (!res.ok) {
+              if (res.status === 404) {
+                  throw new Error('Tasks endpoint not found. Please check if the backend has this endpoint.');
+              }
+              throw new Error(`HTTP error! status: ${res.status}`);
+          }
+
+          const tasks = await res.json();
+
+          if (!tasks || tasks.length === 0) {
+              tbody.innerHTML = `
+                  <tr>
+                      <td colspan="6">
+                          <div class="empty-state">
+                              <i class='bx bx-task-x'></i>
+                              <h3>No Tasks Found</h3>
+                              <p>You don't have any assigned tasks at the moment</p>
+                          </div>
+                      </td>
+                  </tr>
+              `;
+              showNotification('No tasks found for this user', 'info');
+              return;
+          }
+
+          tbody.innerHTML = '';
+          tasks.forEach(task => {
+              const statusClass = getStatusClass(task.status);
+              const row = `
+                  <tr>
+                      <td>${task.id || 'N/A'}</td>
+                      <td><strong>${task.stage?.name || task.stageName || 'N/A'}</strong></td>
+                      <td>${task.productionBatch?.batchNumber || task.batchNumber || 'N/A'}</td>
+                      <td><span class="status-badge ${statusClass}">${task.status || 'PENDING'}</span></td>
+                      <td>${task.startTime ? new Date(task.startTime).toLocaleString() : 'Not started'}</td>
+                      <td>${task.endTime ? new Date(task.endTime).toLocaleString() : 'In progress'}</td>
+                  </tr>
+              `;
+              tbody.innerHTML += row;
+          });
+
+          showNotification(`Loaded ${tasks.length} tasks for user ${userId}`, 'success');
+
+      } catch (error) {
+          console.error('Error fetching assigned tasks:', error);
+
+          // Fallback to sample data if API fails
+          if (error.message.includes('404') || error.message.includes('not found')) {
+              showFallbackTasks(userId, tbody, error);
+          } else {
+              tbody.innerHTML = `
+                  <tr>
+                      <td colspan="6">
+                          <div class="error-state">
+                              <i class='bx bx-error'></i>
+                              <h3>Error Loading Tasks</h3>
+                              <p>${error.message}</p>
+                              <p style="margin-top: 10px; font-size: 12px;">
+                                  <strong>Note:</strong> The tasks endpoint might not be implemented yet.
+                                  Check your TaskController for the endpoint: GET /api/v1/tasks/user/{userId}
+                              </p>
+                          </div>
+                      </td>
+                  </tr>
+              `;
+          }
+
+          showNotification('Error loading tasks: ' + error.message, 'error');
+      }
+  }
+
+  // Fallback function with sample data
+  function showFallbackTasks(userId, tbody, error) {
+      // Sample tasks data for demo purposes
+      const sampleTasks = [
+          {
+              id: 1,
+              stage: { name: "Mixing" },
+              productionBatch: { batchNumber: "BATCH-001" },
+              status: "IN_PROGRESS",
+              startTime: "2024-01-15T08:00:00",
+              endTime: null
+          },
+          {
+              id: 2,
+              stage: { name: "Heating" },
+              productionBatch: { batchNumber: "BATCH-002" },
+              status: "PENDING",
+              startTime: null,
+              endTime: null
+          },
+          {
+              id: 3,
+              stage: { name: "Cooling" },
+              productionBatch: { batchNumber: "BATCH-001" },
+              status: "COMPLETED",
+              startTime: "2024-01-14T14:00:00",
+              endTime: "2024-01-14T16:30:00"
+          }
+      ];
+
+      tbody.innerHTML = '';
+      sampleTasks.forEach(task => {
+          const statusClass = getStatusClass(task.status);
+          const row = `
+              <tr>
+                  <td>${task.id}</td>
+                  <td><strong>${task.stage.name}</strong></td>
+                  <td>${task.productionBatch.batchNumber}</td>
+                  <td><span class="status-badge ${statusClass}">${task.status}</span></td>
+                  <td>${task.startTime ? new Date(task.startTime).toLocaleString() : 'Not started'}</td>
+                  <td>${task.endTime ? new Date(task.endTime).toLocaleString() : 'In progress'}</td>
+              </tr>
+          `;
+          tbody.innerHTML += row;
+      });
+
+      // Add a note about using sample data
+      const noteRow = `
+          <tr>
+              <td colspan="6" style="text-align: center; padding: 10px; background: var(--light-yellow);">
+                  <small>
+                      <i class='bx bx-info-circle'></i>
+                      Showing sample data. API Error: ${error.message}
+                  </small>
+              </td>
+          </tr>
+      `;
+      tbody.innerHTML += noteRow;
+
+      showNotification('Showing sample data (API endpoint not implemented)', 'info');
+  }
+
+  // Allow Enter key to trigger load
+  document.getElementById('userId').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+          fetchAssignedTasks();
+      }
+  });
+
+  // ===== INITIALIZE PAGE =====
+  function init() {
+    displayUserInfo();
+    loadProductionStages();
+
+    // Add user profile click event
+    document.getElementById('userProfile').addEventListener('click', function() {
+      const user = getCurrentUser();
+      alert(`User Information:\n\nName: ${user.name}\nEmail: ${user.email}\nRole: ${user.role}`);
+    });
+
+    // Auto-load current user's tasks
+    const currentUser = getCurrentUser();
+    document.getElementById('userId').value = currentUser.id;
+
+    // Small delay before auto-loading to ensure page is ready
+    setTimeout(() => {
+      fetchAssignedTasks();
+    }, 1000);
+  }
+
+  // Initialize on page load
+  document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

@@ -1,0 +1,2788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - Batch Lifecycle Management</title>
+
+  <!-- Boxicons -->
+  <link href='https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css' rel='stylesheet'>
+
+  <!-- jsPDF for PDF generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+  <!-- html2canvas for logo in PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Poppins:wght@400;500;600;700&family=Times+New+Roman:wght@400;700&display=swap');
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    a {
+        text-decoration: none;
+    }
+
+    li {
+        list-style: none;
+    }
+
+    :root {
+        --poppins: 'Poppins', sans-serif;
+        --lato: 'Lato', sans-serif;
+        --times: 'Times New Roman', serif;
+        --light: #F9F9F9;
+        --blue: #2D4F2B;
+        --light-blue: #E8F5E9;
+        --grey: #eee;
+        --dark-grey: #AAAAAA;
+        --dark: #342E37;
+        --red: #DB504A;
+        --yellow: #FFCE26;
+        --light-yellow: #FFF2C6;
+        --orange: #FD7238;
+        --light-orange: #FFE0D3;
+        --success: #16a34a;
+        --warning: #f59e0b;
+        --danger: #dc2626;
+        --primary: #2c3e50;
+        --secondary: #3b82f6;
+        --info: #0ea5e9;
+        --purple: #8b5cf6;
+        --green: #2D4F2B;
+        --light-green: #E8F5E9;
+        --pdf-green: #2D4F2B;
+        --pdf-light-green: #E8F5E9;
+        --pdf-dark-green: #1E3520;
+    }
+
+    html {
+        overflow-x: hidden;
+    }
+
+    body.dark {
+        --light: #0C0C1E;
+        --grey: #060714;
+        --dark: #FBFBFB;
+        --light-green: #1A2B1A;
+    }
+
+    body {
+        background: var(--grey);
+        overflow-x: hidden;
+        font-family: var(--lato);
+    }
+
+    /* SIDEBAR */
+    #sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 280px;
+        height: 100%;
+        background: var(--light);
+        z-index: 2000;
+        font-family: var(--lato);
+        transition: .3s ease;
+        overflow-x: hidden;
+        scrollbar-width: none;
+    }
+    #sidebar::-webkit-scrollbar {
+        display: none;
+    }
+    #sidebar.hide {
+        width: 60px;
+    }
+    #sidebar .brand {
+        font-size: 24px;
+        font-weight: 700;
+        height: 56px;
+        display: flex;
+        align-items: center;
+        color: var(--green);
+        position: sticky;
+        top: 0;
+        left: 0;
+        background: var(--light);
+        z-index: 500;
+        padding-bottom: 20px;
+        box-sizing: content-box;
+    }
+    #sidebar .brand .bx {
+        min-width: 60px;
+        display: flex;
+        justify-content: center;
+    }
+    #sidebar .side-menu {
+        width: 100%;
+        margin-top: 48px;
+    }
+    #sidebar .side-menu li {
+        height: 48px;
+        background: transparent;
+        margin-left: 6px;
+        border-radius: 48px 0 0 48px;
+        padding: 4px;
+    }
+    #sidebar .side-menu li.active {
+        background: var(--grey);
+        position: relative;
+    }
+    #sidebar .side-menu li.active::before {
+        content: '';
+        position: absolute;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        top: -40px;
+        right: 0;
+        box-shadow: 20px 20px 0 var(--grey);
+        z-index: -1;
+    }
+    #sidebar .side-menu li.active::after {
+        content: '';
+        position: absolute;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        bottom: -40px;
+        right: 0;
+        box-shadow: 20px -20px 0 var(--grey);
+        z-index: -1;
+    }
+    #sidebar .side-menu li a {
+        width: 100%;
+        height: 100%;
+        background: var(--light);
+        display: flex;
+        align-items: center;
+        border-radius: 48px;
+        font-size: 16px;
+        color: var(--dark);
+        white-space: nowrap;
+        overflow-x: hidden;
+    }
+    #sidebar .side-menu.top li.active a {
+        color: var(--green);
+    }
+    #sidebar.hide .side-menu li a {
+        width: calc(48px - (4px * 2));
+        transition: width .3s ease;
+    }
+    #sidebar .side-menu li a.logout {
+        color: var(--red);
+    }
+    #sidebar .side-menu.top li a:hover {
+        color: var(--green);
+    }
+    #sidebar .side-menu li a .bx {
+        min-width: calc(60px  - ((4px + 6px) * 2));
+        display: flex;
+        justify-content: center;
+    }
+
+    /* CONTENT */
+    #content {
+        position: relative;
+        width: calc(100% - 280px);
+        left: 280px;
+        transition: .3s ease;
+    }
+    #sidebar.hide ~ #content {
+        width: calc(100% - 60px);
+        left: 60px;
+    }
+
+    /* NAVBAR */
+    #content nav {
+        height: 56px;
+        background: var(--light);
+        padding: 0 24px;
+        display: flex;
+        align-items: center;
+        grid-gap: 24px;
+        font-family: var(--lato);
+        position: sticky;
+        top: 0;
+        left: 0;
+        z-index: 1000;
+    }
+    #content nav::before {
+        content: '';
+        position: absolute;
+        width: 40px;
+        height: 40px;
+        bottom: -40px;
+        left: 0;
+        border-radius: 50%;
+        box-shadow: -20px -20px 0 var(--light);
+    }
+    #content nav a {
+        color: var(--dark);
+    }
+    #content nav .bx.bx-menu {
+        cursor: pointer;
+        color: var(--dark);
+    }
+    #content nav .nav-link {
+        font-size: 16px;
+        transition: .3s ease;
+    }
+    #content nav .nav-link:hover {
+        color: var(--green);
+    }
+    #content nav form {
+        max-width: 400px;
+        width: 100%;
+        margin-right: auto;
+    }
+    #content nav form .form-input {
+        display: flex;
+        align-items: center;
+        height: 36px;
+    }
+    #content nav form .form-input input {
+        flex-grow: 1;
+        padding: 0 16px;
+        height: 100%;
+        border: none;
+        background: var(--grey);
+        border-radius: 36px 0 0 36px;
+        outline: none;
+        width: 100%;
+        color: var(--dark);
+    }
+    #content nav form .form-input button {
+        width: 36px;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: var(--green);
+        color: var(--light);
+        font-size: 18px;
+        border: none;
+        outline: none;
+        border-radius: 0 36px 36px 0;
+        cursor: pointer;
+    }
+
+    /* User Profile in Navbar */
+    #content nav .user-profile {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 5px 15px;
+        border-radius: 20px;
+        background: var(--light-green);
+        color: var(--dark);
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+
+    #content nav .user-profile:hover {
+        background: var(--light-blue);
+    }
+
+    #content nav .user-profile .user-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--green);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 14px;
+    }
+
+    #content nav .user-profile .user-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    #content nav .user-profile .user-name {
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    #content nav .user-profile .user-email {
+        font-size: 11px;
+        color: var(--dark-grey);
+    }
+
+    #content nav .notification {
+        font-size: 20px;
+        position: relative;
+        cursor: pointer;
+    }
+    #content nav .notification .num {
+        position: absolute;
+        top: -6px;
+        right: -6px;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 2px solid var(--light);
+        background: var(--red);
+        color: var(--light);
+        font-weight: 700;
+        font-size: 12px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    #content nav .switch-mode {
+        display: block;
+        min-width: 50px;
+        height: 25px;
+        border-radius: 25px;
+        background: var(--grey);
+        cursor: pointer;
+        position: relative;
+    }
+    #content nav .switch-mode::before {
+        content: '';
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        bottom: 2px;
+        width: calc(25px - 4px);
+        background: var(--green);
+        border-radius: 50%;
+        transition: all .3s ease;
+    }
+    #content nav #switch-mode:checked + .switch-mode::before {
+        left: calc(100% - (25px - 4px) - 2px);
+    }
+
+    /* MAIN */
+    #content main {
+        width: 100%;
+        padding: 36px 24px;
+        font-family: var(--poppins);
+        max-height: calc(100vh - 56px);
+        overflow-y: auto;
+    }
+    #content main .head-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        grid-gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 24px;
+    }
+    #content main .head-title .left h1 {
+        font-size: 36px;
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: var(--dark);
+    }
+    #content main .head-title .left .breadcrumb {
+        display: flex;
+        align-items: center;
+        grid-gap: 16px;
+    }
+    #content main .head-title .left .breadcrumb li {
+        color: var(--dark);
+    }
+    #content main .head-title .left .breadcrumb li a {
+        color: var(--dark-grey);
+        pointer-events: none;
+    }
+    #content main .head-title .left .breadcrumb li a.active {
+        color: var(--green);
+        pointer-events: unset;
+    }
+
+    /* Action Buttons */
+    .head-title .action-buttons {
+        display: flex;
+        gap: 10px;
+    }
+
+    .head-title .btn-pdf {
+        height: 36px;
+        padding: 0 16px;
+        border-radius: 36px;
+        background: var(--danger);
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        grid-gap: 10px;
+        font-weight: 500;
+        cursor: pointer;
+        border: none;
+        transition: all 0.3s;
+        font-family: var(--poppins);
+        position: relative;
+    }
+
+    .head-title .btn-pdf:hover {
+        background: #c53030;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+    }
+
+    .head-title .btn-pdf:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+    .pdf-spinner {
+        display: inline-block;
+        width: 18px;
+        height: 18px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spin 1s ease-in-out infinite;
+        display: none;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Toast Notification */
+    .toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        border-radius: 8px;
+        color: white;
+        font-weight: 500;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        animation: slideInRight 0.3s ease;
+        max-width: 400px;
+    }
+
+    @keyframes slideInRight {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    .toast-success {
+        background: linear-gradient(135deg, var(--success), #22c55e);
+    }
+
+    .toast-error {
+        background: linear-gradient(135deg, var(--danger), #ef4444);
+    }
+
+    .toast-warning {
+        background: linear-gradient(135deg, var(--warning), #fbbf24);
+    }
+
+    .toast-info {
+        background: linear-gradient(135deg, var(--secondary), #3b82f6);
+    }
+
+    #content main .head-title .btn-download {
+        height: 36px;
+        padding: 0 16px;
+        border-radius: 36px;
+        background: var(--green);
+        color: var(--light);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        grid-gap: 10px;
+        font-weight: 500;
+        cursor: pointer;
+        border: none;
+        transition: background 0.3s;
+    }
+    #content main .head-title .btn-download:hover {
+        background: #1F3A1E;
+    }
+
+    /* Stats Container */
+    .stats-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .stat-card {
+        text-align: center;
+        padding: 20px;
+        border-radius: 12px;
+        color: white;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+        cursor: pointer;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .stat-card h3 {
+        font-size: 2rem;
+        margin-bottom: 5px;
+    }
+
+    .stat-card.in-progress {
+        background: linear-gradient(135deg, var(--info), #0ea5e9);
+    }
+
+    .stat-card.qc-pending {
+        background: linear-gradient(135deg, var(--warning), #fbbf24);
+    }
+
+    .stat-card.completed {
+        background: linear-gradient(135deg, var(--success), #22c55e);
+    }
+
+    .stat-card.archived {
+        background: linear-gradient(135deg, var(--primary), #2c3e50);
+    }
+
+    /* Card Container */
+    .card {
+        background: var(--light);
+        border-radius: 20px;
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .card-header h2 {
+        color: var(--dark);
+        font-size: 1.5rem;
+    }
+
+    .controls {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    input, select, button {
+        padding: 10px 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-family: var(--lato);
+    }
+
+    button {
+        background-color: var(--green);
+        color: white;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    button:hover {
+        opacity: 0.9;
+        transform: translateY(-2px);
+    }
+
+    button.add {
+        background-color: var(--green);
+    }
+
+    button.refresh {
+        background-color: var(--secondary);
+    }
+
+    button.edit {
+        background-color: var(--warning);
+    }
+
+    button.delete {
+        background-color: var(--danger);
+    }
+
+    button.export {
+        background-color: var(--purple);
+    }
+
+    button.filter-btn {
+        background-color: var(--grey);
+        color: var(--dark);
+        border: 1px solid #ddd;
+    }
+
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 3000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        animation: fadeIn 0.3s ease;
+        align-items: center;
+        justify-content: center;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .modal-content {
+        background-color: var(--light);
+        padding: 30px;
+        border-radius: 15px;
+        width: 90%;
+        max-width: 600px;
+        max-height: 80vh;
+        overflow-y: auto;
+        animation: slideIn 0.3s ease;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid var(--green);
+    }
+
+    .modal-header h2 {
+        color: var(--green);
+        font-size: 24px;
+    }
+
+    .close-modal {
+        color: var(--dark-grey);
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: color 0.3s;
+    }
+
+    .close-modal:hover {
+        color: var(--red);
+    }
+
+    /* Form Styles */
+    .form-container {
+        background: var(--light);
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-group label {
+        margin-bottom: 8px;
+        color: var(--dark);
+        font-weight: 500;
+    }
+
+    .form-group input,
+    .form-group select {
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background-color: white;
+        color: var(--dark);
+        font-family: var(--lato);
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: var(--green);
+        box-shadow: 0 0 0 2px rgba(45, 79, 43, 0.2);
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .form-actions button {
+        flex: 1;
+        padding: 12px;
+    }
+
+    .form-actions button[type="submit"] {
+        background-color: var(--success);
+    }
+
+    .form-actions button[type="button"] {
+        background-color: var(--grey);
+        color: var(--dark);
+    }
+
+    /* Error Message */
+    .error-message {
+        color: var(--danger);
+        font-size: 0.85rem;
+        margin-top: 5px;
+        display: none;
+    }
+
+    /* Table Styles */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        background-color: var(--light);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    th, td {
+        padding: 15px;
+        text-align: left;
+        border-bottom: 1px solid var(--grey);
+    }
+
+    th {
+        background-color: var(--grey);
+        font-weight: 600;
+        color: var(--dark);
+        position: relative;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    th:hover {
+        background-color: #e6e6e6;
+    }
+
+    tr:hover {
+        background-color: rgba(0, 0, 0, 0.02);
+    }
+
+    tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* Status Badges */
+    .badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        min-width: 120px;
+        text-align: center;
+    }
+
+    .badge.in-progress {
+        background-color: #dbeafe;
+        color: #1e40af;
+    }
+
+    .badge.qc-pending {
+        background-color: #fef3c7;
+        color: #92400e;
+    }
+
+    .badge.completed {
+        background-color: #d1fae5;
+        color: #065f46;
+    }
+
+    .badge.archived {
+        background-color: #e5e7eb;
+        color: #374151;
+    }
+
+    /* Alert Styles */
+    .alert {
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        display: none;
+        font-weight: 500;
+        animation: slideIn 0.3s ease;
+    }
+
+    .alert-success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .alert-error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .alert-info {
+        background-color: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #bee5eb;
+    }
+
+    /* Loading Indicator */
+    .loading {
+        text-align: center;
+        padding: 40px;
+        font-style: italic;
+        color: var(--dark-grey);
+        display: none;
+    }
+
+    .loading-spinner {
+        border: 3px solid var(--grey);
+        border-top: 3px solid var(--green);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 15px;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 40px;
+        color: var(--dark-grey);
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 15px;
+        color: #ddd;
+    }
+
+    /* Filter Section */
+    .filter-section {
+        background: var(--grey);
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+
+    .filter-row {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        align-items: flex-end;
+    }
+
+    .filter-group {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .filter-group label {
+        display: block;
+        margin-bottom: 5px;
+        color: var(--dark);
+        font-weight: 500;
+    }
+
+    /* Hidden PDF Container */
+    #pdf-container {
+        position: fixed;
+        top: -9999px;
+        left: -9999px;
+        width: 794px; /* A4 width in pixels at 96 DPI */
+        padding: 40px;
+        background: white;
+        font-family: "Times New Roman", Times, serif;
+        z-index: 9999;
+        display: none;
+    }
+
+    .pdf-header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 3px solid var(--pdf-green);
+        position: relative;
+        background: linear-gradient(135deg, var(--pdf-light-green) 0%, #ffffff 100%);
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .watermark {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-45deg);
+        font-size: 120px;
+        color: rgba(45, 79, 43, 0.03);
+        font-weight: bold;
+        pointer-events: none;
+        white-space: nowrap;
+        text-transform: uppercase;
+        letter-spacing: 10px;
+    }
+
+    .pdf-logo {
+        height: 90px;
+        margin-bottom: 20px;
+        max-width: 220px;
+        object-fit: contain;
+    }
+
+    .pdf-title {
+        font-size: 32px;
+        color: var(--pdf-green);
+        margin-bottom: 10px;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .pdf-subtitle {
+        font-size: 18px;
+        color: #3A6B37;
+        margin-bottom: 8px;
+        font-weight: 600;
+    }
+
+    .pdf-date {
+        font-size: 14px;
+        color: #666;
+        margin-top: 15px;
+    }
+
+    .pdf-generated-by {
+        font-size: 12px;
+        color: #666;
+        margin-top: 5px;
+    }
+
+    .pdf-statistics {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+        margin: 35px 0;
+        padding: 25px;
+        background: linear-gradient(135deg, #f9f9f9, #ffffff);
+        border-radius: 15px;
+        border: 2px solid var(--pdf-light-green);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+
+    .pdf-stat-box {
+        text-align: center;
+        padding: 20px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        border: 2px solid var(--pdf-light-green);
+        transition: all 0.3s ease;
+    }
+
+    .pdf-stat-value {
+        font-size: 28px;
+        font-weight: bold;
+        color: var(--pdf-green);
+        margin-bottom: 8px;
+    }
+
+    .pdf-stat-label {
+        font-size: 14px;
+        color: #666;
+        font-weight: 600;
+    }
+
+    .pdf-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 25px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+
+    .pdf-table th {
+        background: linear-gradient(90deg, var(--pdf-green), #3A6B37);
+        color: white;
+        padding: 15px;
+        text-align: left;
+        font-size: 13px;
+        font-weight: bold;
+        border: 1px solid #ddd;
+        letter-spacing: 0.5px;
+    }
+
+    .pdf-table td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #eee;
+        border: 1px solid #ddd;
+        font-size: 12px;
+    }
+
+    .pdf-table tr:nth-child(even) {
+        background: #f9f9f9;
+    }
+
+    .pdf-footer {
+        margin-top: 50px;
+        padding-top: 25px;
+        border-top: 2px solid #eee;
+        text-align: center;
+        font-size: 11px;
+        color: #666;
+        line-height: 1.6;
+    }
+
+    /* Responsive */
+    @media screen and (max-width: 768px) {
+        #sidebar {
+            width: 200px;
+        }
+
+        #content {
+            width: calc(100% - 200px);
+            left: 200px;
+        }
+
+        #content nav .nav-link {
+            display: none;
+        }
+
+        .card-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .controls {
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+
+        table {
+            display: block;
+            overflow-x: auto;
+        }
+
+        .stats-container {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .filter-row {
+            flex-direction: column;
+        }
+
+        .filter-group {
+            min-width: 100%;
+        }
+
+        .pdf-statistics {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    @media screen and (max-width: 576px) {
+        #content nav form .form-input input {
+            display: none;
+        }
+
+        #content nav form .form-input button {
+            width: auto;
+            height: auto;
+            background: transparent;
+            color: var(--dark);
+        }
+
+        #content nav form.show .form-input input {
+            display: block;
+            width: 100%;
+        }
+        #content nav form.show .form-input button {
+            width: 36px;
+            height: 100%;
+            border-radius: 0 36px 36px 0;
+            color: var(--light);
+            background: var(--green);
+        }
+
+        #content nav form.show ~ .user-profile,
+        #content nav form.show ~ .notification,
+        #content nav form.show ~ .switch-mode {
+            display: none;
+        }
+
+        .stats-container {
+            grid-template-columns: 1fr;
+        }
+
+        th, td {
+            padding: 10px 8px;
+            font-size: 0.9rem;
+        }
+
+        .actions button {
+            display: block;
+            width: 100%;
+            margin-bottom: 5px;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .pdf-statistics {
+            grid-template-columns: 1fr;
+        }
+    }
+  </style>
+</head>
+<body>
+<!-- SIDEBAR -->
+<section id="sidebar">
+  <a href="#" class="brand">
+    <i class='bx bxs-factory'></i>
+    <span class="text">ProTrack</span>
+  </a>
+
+  <ul class="side-menu top">
+    <!-- Dashboard -->
+    <li>
+      <a href="admin.html">
+        <i class='bx bxs-dashboard'></i>
+        <span class="text">Dashboard</span>
+      </a>
+    </li>
+
+    <!-- User -->
+    <li>
+      <a href="user.html">
+        <i class='bx bxs-user'></i>
+        <span class="text">Utilisateur</span>
+      </a>
+    </li>
+
+    <!-- Raw Material -->
+    <li>
+      <a href="adraw.html">
+        <i class='bx bx-package'></i>
+        <span class="text">Raw Material</span>
+      </a>
+    </li>
+
+    <!-- Material Intake -->
+    <li>
+      <a href="amintake.html">
+        <i class='bx bx-download'></i>
+        <span class="text">Material Intake</span>
+      </a>
+    </li>
+
+    <!-- Material Consumption -->
+    <li>
+      <a href="amconsump.html">
+        <i class='bx bx-upload'></i>
+        <span class="text">Material Consumption</span>
+      </a>
+    </li>
+
+    <!-- Production Stage -->
+    <li>
+      <a href="apstage.html">
+        <i class='bx bx-git-branch'></i>
+        <span class="text">Production Stage</span>
+      </a>
+    </li>
+
+    <!-- Production Task -->
+    <li>
+      <a href="aprtask.html">
+        <i class='bx bx-task'></i>
+        <span class="text">Production Task</span>
+      </a>
+    </li>
+
+    <!-- Production Batch -->
+    <li class="active">
+      <a href="aprbatch.html">
+        <i class='bx bx-grid-alt'></i>
+        <span class="text">Production Batch</span>
+      </a>
+    </li>
+
+    <!-- Product -->
+    <li>
+      <a href="product.html">
+        <i class='bx bx-cube'></i>
+        <span class="text">Product</span>
+      </a>
+    </li>
+
+    <!-- QC Checkpoint -->
+    <li>
+      <a href="adqccheck.html">
+        <i class='bx bx-check-shield'></i>
+        <span class="text">QC Checkpoint</span>
+      </a>
+    </li>
+
+    <!-- QC Record -->
+    <li>
+      <a href="adqcrecord.html">
+        <i class='bx bx-clipboard'></i>
+        <span class="text">QC Record</span>
+      </a>
+    </li>
+
+    <!-- Audit Log -->
+    <li>
+      <a href="adaudit.html">
+        <i class='bx bx-history'></i>
+        <span class="text">Audit Log</span>
+      </a>
+    </li>
+
+    <!-- Statistics -->
+    <li>
+      <a href="report.html">
+        <i class='bx bxs-bar-chart-alt-2'></i>
+        <span class="text">Statistiques</span>
+      </a>
+    </li>
+  </ul>
+
+  <ul class="side-menu">
+    <li>
+      <a href="login.html" class="logout" id="logout-btn">
+        <i class='bx bxs-log-out-circle'></i>
+        <span class="text">Logout</span>
+      </a>
+    </li>
+  </ul>
+</section>
+<!-- SIDEBAR -->
+
+<!-- CONTENT -->
+<section id="content">
+  <!-- NAVBAR -->
+  <nav>
+    <i class='bx bx-menu'></i>
+    <a href="#" class="nav-link">Batch Lifecycle Management</a>
+    <form action="#">
+      <div class="form-input">
+        <input type="search" placeholder="Search batches..." id="searchInput">
+        <button type="button" class="search-btn" id="searchBtn"><i class='bx bx-search'></i></button>
+      </div>
+    </form>
+
+    <!-- User Profile -->
+    <div class="user-profile" id="user-profile">
+      <div class="user-avatar" id="user-avatar">A</div>
+      <div class="user-info">
+        <div class="user-name" id="user-name">Administrator</div>
+        <div class="user-email" id="user-email">admin@protrack.com</div>
+      </div>
+    </div>
+
+    <div class="notification">
+      <i class='bx bxs-bell'></i>
+      <span class="num" id="notificationCount">0</span>
+    </div>
+    <input type="checkbox" id="switch-mode" hidden>
+    <label for="switch-mode" class="switch-mode"></label>
+  </nav>
+  <!-- NAVBAR -->
+
+  <!-- MAIN -->
+  <main>
+    <div class="head-title">
+      <div class="left">
+        <h1>Batch Lifecycle Management</h1>
+        <ul class="breadcrumb">
+          <li>
+            <a href="admin.html">Dashboard</a>
+          </li>
+          <li><i class='bx bx-chevron-right'></i></li>
+          <li>
+            <a class="active" href="#">Production Batches</a>
+          </li>
+        </ul>
+      </div>
+      <div class="action-buttons">
+        <button class="btn-pdf" id="downloadPdf">
+          <i class='bx bxs-file-pdf'></i>
+          <span id="pdfText">Download PDF</span>
+          <span class="pdf-spinner" id="pdfSpinner" style="display: none;"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer"></div>
+
+    <!-- Alert Box -->
+    <div id="alertBox" class="alert"></div>
+
+    <!-- Stats Container -->
+    <div class="stats-container">
+      <div class="stat-card in-progress" onclick="filterByStatus('IN_PROGRESS')">
+        <h3 id="inProgressCount">0</h3>
+        <p>In Progress</p>
+      </div>
+      <div class="stat-card qc-pending" onclick="filterByStatus('QC_PENDING')">
+        <h3 id="qcPendingCount">0</h3>
+        <p>QC Pending</p>
+      </div>
+      <div class="stat-card completed" onclick="filterByStatus('COMPLETED')">
+        <h3 id="completedCount">0</h3>
+        <p>Completed</p>
+      </div>
+      <div class="stat-card archived" onclick="filterByStatus('ARCHIVED')">
+        <h3 id="archivedCount">0</h3>
+        <p>Archived</p>
+      </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+      <div class="filter-row">
+        <div class="filter-group">
+          <label for="statusFilter">Status Filter</label>
+          <select id="statusFilter">
+            <option value="all">All Status</option>
+            <option value="IN_PROGRESS">In Progress</option>
+            <option value="QC_PENDING">QC Pending</option>
+            <option value="COMPLETED">Completed</option>
+            <option value="ARCHIVED">Archived</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="dateFilter">Date Range</label>
+          <select id="dateFilter">
+            <option value="all">All Dates</option>
+            <option value="today">Today</option>
+            <option value="week">This Week</option>
+            <option value="month">This Month</option>
+            <option value="quarter">This Quarter</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>&nbsp;</label>
+          <button id="clearFilters" class="filter-btn">Clear Filters</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Card - Batch Table -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Batch Records</h2>
+        <div class="controls">
+          <button class="add" onclick="openAddModal()">
+            <i class='bx bx-plus'></i> Add New Batch
+          </button>
+          <button id="refresh" class="refresh">
+            <i class='bx bx-refresh'></i> Refresh
+          </button>
+          <button class="export" onclick="exportToExcel()">
+            <i class='bx bx-export'></i> Export Excel
+          </button>
+          <span id="recordCount">0 records found</span>
+        </div>
+      </div>
+
+      <!-- Loading Indicator -->
+      <div id="loadingIndicator" class="loading">
+        <div class="loading-spinner"></div>
+        <p>Loading batches...</p>
+      </div>
+
+      <!-- Table -->
+      <table id="batchTable">
+        <thead>
+        <tr>
+          <th>ID</th>
+          <th>Batch Number</th>
+          <th>Status</th>
+          <th>Product Type</th>
+          <th>Quantity</th>
+          <th>Start Date</th>
+          <th>End Date</th>
+          <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody id="batchTableBody">
+        <!-- Data will be populated here -->
+        </tbody>
+      </table>
+
+      <!-- Empty State -->
+      <div id="emptyState" class="empty-state" style="display: none;">
+        <i class='bx bx-grid-alt'></i>
+        <h3>No Batches Found</h3>
+        <p>There are no production batches matching your criteria.</p>
+      </div>
+    </div>
+  </main>
+  <!-- MAIN -->
+</section>
+<!-- CONTENT -->
+
+<!-- Add/Edit Batch Modal -->
+<div id="batchModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 id="modalTitle">Add New Batch</h2>
+      <span class="close-modal" onclick="closeModal('batchModal')">&times;</span>
+    </div>
+    <div class="form-container">
+      <form id="batchForm">
+        <input type="hidden" id="batchId">
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="modalBatchNumber">Batch Number *</label>
+            <input type="text" id="modalBatchNumber" placeholder="Enter batch number" required>
+            <div class="error-message" id="batchNumberError"></div>
+          </div>
+          <div class="form-group">
+            <label for="modalProductType">Product Type *</label>
+            <input type="text" id="modalProductType" placeholder="Enter product type" required>
+            <div class="error-message" id="productTypeError"></div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="modalStartDate">Start Date *</label>
+            <input type="date" id="modalStartDate" required>
+            <div class="error-message" id="startDateError"></div>
+          </div>
+          <div class="form-group">
+            <label for="modalEndDate">End Date (Optional)</label>
+            <input type="date" id="modalEndDate">
+            <div class="error-message" id="endDateError"></div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="modalProductQuantity">Product Quantity *</label>
+            <input type="number" id="modalProductQuantity" placeholder="Enter quantity" required min="1">
+            <div class="error-message" id="quantityError"></div>
+          </div>
+          <div class="form-group">
+            <label for="modalStatus">Status *</label>
+            <select id="modalStatus" required>
+              <option value="IN_PROGRESS">In Progress</option>
+              <option value="QC_PENDING">QC Pending</option>
+              <option value="COMPLETED">Completed</option>
+              <option value="ARCHIVED">Archived</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" id="modalSaveButton">
+            <i class='bx bx-save'></i> Save Batch
+          </button>
+          <button type="button" onclick="closeModal('batchModal')">
+            <i class='bx bx-x'></i> Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="modal delete-modal">
+  <div class="modal-content">
+    <div class="delete-icon">
+      <i class='bx bxs-trash-alt'></i>
+    </div>
+    <div class="delete-message">
+      <h3>Delete Confirmation</h3>
+      <p>Are you sure you want to delete this batch?</p>
+      <p id="deleteItemDetails" style="font-style: italic; color: var(--dark-grey); margin-top: 10px;"></p>
+      <p style="color: var(--danger); font-weight: bold; margin-top: 15px;">
+        This action cannot be undone!
+      </p>
+    </div>
+    <div class="delete-actions">
+      <button class="confirm-delete" id="confirmDelete">Yes, Delete</button>
+      <button class="cancel-delete" onclick="closeModal('deleteModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden PDF Container -->
+<div id="pdf-container" style="display: none;">
+  <div class="pdf-header">
+    <div class="watermark">BATCH REPORT</div>
+    <!-- Company Logo -->
+    <div style="text-align: center; margin-bottom: 15px;">
+      <img class="pdf-logo" id="pdf-logo" src="" alt="ProTrack Logo">
+    </div>
+    <h1 class="pdf-title">ProTrack System</h1>
+    <div class="pdf-subtitle">Production Batches Report</div>
+    <div class="pdf-date" id="pdf-report-date"></div>
+    <div class="pdf-generated-by" id="pdf-generated-by"></div>
+  </div>
+
+  <div class="pdf-statistics" id="pdf-statistics">
+    <!-- Statistics will be filled by JavaScript -->
+  </div>
+
+  <h3 style="margin-top: 40px; color: #2D4F2B; border-bottom: 2px solid #E8F5E9; padding-bottom: 10px; text-align: center;">
+    Production Batches List
+  </h3>
+  <table class="pdf-table" id="pdf-table">
+    <thead>
+    <tr>
+      <th>ID</th>
+      <th>Batch Number</th>
+      <th>Status</th>
+      <th>Product Type</th>
+      <th>Quantity</th>
+      <th>Start Date</th>
+      <th>End Date</th>
+    </tr>
+    </thead>
+    <tbody id="pdf-table-body">
+    <!-- Table data will be filled by JavaScript -->
+    </tbody>
+  </table>
+
+  <div class="pdf-footer">
+    <p><strong>ProTrack - Production Management System</strong></p>
+    <p>This report contains confidential information. Unauthorized distribution is prohibited.</p>
+    <p>Report generated from ProTrack Batch Management System | This is an official document</p>
+  </div>
+</div>
+
+<script>
+  // ==================== CONFIGURATION ====================
+  const API_BASE = 'http://localhost:1010';
+  const BATCHES_API = `${API_BASE}/api/v1/batches`;
+  const LOGO_PATH = 'cs.jpg'; // Your logo file name
+
+  // Get current user from localStorage
+  const currentUser = JSON.parse(localStorage.getItem('currentUser')) || {
+    firstName: 'Admin',
+    lastName: 'User',
+    email: 'admin@protrack.com',
+    role: 'ADMIN'
+  };
+
+  // Check if user is logged in
+  if (!currentUser) {
+      window.location.href = 'index.html';
+  }
+
+  // DOM Elements
+  const batchTableBody = document.getElementById('batchTableBody');
+  const batchTable = document.getElementById('batchTable');
+  const alertBox = document.getElementById('alertBox');
+  const loadingIndicator = document.getElementById('loadingIndicator');
+  const emptyState = document.getElementById('emptyState');
+  const refreshBtn = document.getElementById('refresh');
+  const searchInput = document.getElementById('searchInput');
+  const searchBtn = document.getElementById('searchBtn');
+  const statusFilter = document.getElementById('statusFilter');
+  const dateFilter = document.getElementById('dateFilter');
+  const clearFiltersBtn = document.getElementById('clearFilters');
+  const recordCount = document.getElementById('recordCount');
+  const downloadPdfBtn = document.getElementById('downloadPdf');
+  const pdfText = document.getElementById('pdfText');
+  const pdfSpinner = document.getElementById('pdfSpinner');
+
+  // Stats Elements
+  const inProgressCount = document.getElementById('inProgressCount');
+  const qcPendingCount = document.getElementById('qcPendingCount');
+  const completedCount = document.getElementById('completedCount');
+  const archivedCount = document.getElementById('archivedCount');
+  const notificationCount = document.getElementById('notificationCount');
+
+  // Modal Elements
+  const batchModal = document.getElementById('batchModal');
+  const modalTitle = document.getElementById('modalTitle');
+  const batchForm = document.getElementById('batchForm');
+  const modalSaveButton = document.getElementById('modalSaveButton');
+  const deleteModal = document.getElementById('deleteModal');
+  const confirmDeleteBtn = document.getElementById('confirmDelete');
+
+  // User Profile Elements
+  const userName = document.getElementById('user-name');
+  const userEmail = document.getElementById('user-email');
+  const userAvatar = document.getElementById('user-avatar');
+
+  // PDF Elements
+  const pdfLogo = document.getElementById('pdf-logo');
+
+  // State Variables
+  let allBatches = [];
+  let filteredBatches = [];
+  let isEditing = false;
+  let currentBatchId = null;
+  let batchToDelete = null;
+  let logoImageData = null;
+  let logoLoaded = false;
+
+  // Initialize Application
+  document.addEventListener('DOMContentLoaded', function() {
+      initializeUserProfile();
+      preloadLogo();
+      initializeApp();
+      setupEventListeners();
+  });
+
+  function initializeUserProfile() {
+      // Display user information
+      userName.textContent = `${currentUser.firstName || 'Admin'} ${currentUser.lastName || ''}`.trim();
+      userEmail.textContent = currentUser.email || 'admin@protrack.com';
+
+      // Generate avatar initials
+      const firstName = currentUser.firstName || 'A';
+      const lastName = currentUser.lastName || 'D';
+      userAvatar.textContent = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+
+      // Logout functionality
+      document.getElementById('logout-btn').addEventListener('click', function(e) {
+          e.preventDefault();
+          if (confirm('Are you sure you want to logout?')) {
+              localStorage.removeItem('currentUser');
+              window.location.href = 'login.html';
+          }
+      });
+  }
+
+  async function preloadLogo() {
+      const img = new Image();
+      img.crossOrigin = "Anonymous";
+      img.src = LOGO_PATH + '?t=' + new Date().getTime();
+
+      return new Promise((resolve) => {
+          img.onload = function() {
+              console.log('Logo loaded successfully from:', LOGO_PATH);
+              const canvas = document.createElement('canvas');
+              const ctx = canvas.getContext('2d');
+              canvas.width = img.width;
+              canvas.height = img.height;
+              ctx.drawImage(img, 0, 0);
+              logoImageData = canvas.toDataURL('image/jpeg');
+              logoLoaded = true;
+              pdfLogo.src = logoImageData;
+              resolve();
+          };
+
+          img.onerror = function(err) {
+              console.error('Error loading logo from path:', LOGO_PATH, err);
+              const alternativePaths = [
+                  'img/cs.jpg',
+                  'images/cs.jpg',
+                  './cs.jpg',
+                  './img/cs.jpg',
+                  './images/cs.jpg',
+                  '../cs.jpg',
+                  '../img/cs.jpg'
+              ];
+
+              let currentIndex = 0;
+              const tryNextPath = () => {
+                  if (currentIndex >= alternativePaths.length) {
+                      useFallbackLogo();
+                      resolve();
+                      return;
+                  }
+
+                  const altPath = alternativePaths[currentIndex];
+                  console.log('Trying alternative path:', altPath);
+
+                  const altImg = new Image();
+                  altImg.crossOrigin = "Anonymous";
+                  altImg.src = altPath + '?t=' + new Date().getTime();
+
+                  altImg.onload = function() {
+                      console.log('Logo loaded from alternative path:', altPath);
+                      const canvas = document.createElement('canvas');
+                      const ctx = canvas.getContext('2d');
+                      canvas.width = altImg.width;
+                      canvas.height = altImg.height;
+                      ctx.drawImage(altImg, 0, 0);
+                      logoImageData = canvas.toDataURL('image/jpeg');
+                      logoLoaded = true;
+                      pdfLogo.src = logoImageData;
+                      resolve();
+                  };
+
+                  altImg.onerror = function() {
+                      currentIndex++;
+                      setTimeout(tryNextPath, 100);
+                  };
+              };
+
+              tryNextPath();
+          };
+      });
+  }
+
+  function useFallbackLogo() {
+      console.log('Using fallback logo');
+      const canvas = document.createElement('canvas');
+      canvas.width = 200;
+      canvas.height = 100;
+      const ctx = canvas.getContext('2d');
+
+      ctx.fillStyle = '#2D4F2B';
+      ctx.fillRect(0, 0, 200, 100);
+
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = 'bold 24px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('PROTRACK', 100, 30);
+
+      ctx.font = '16px Arial';
+      ctx.fillText('BATCH REPORT', 100, 60);
+
+      logoImageData = canvas.toDataURL('image/png');
+      logoLoaded = true;
+      pdfLogo.src = logoImageData;
+  }
+
+  async function initializeApp() {
+      await loadBatches();
+      setupSidebar();
+  }
+
+  function setupEventListeners() {
+      // Refresh button
+      refreshBtn.addEventListener('click', loadBatches);
+
+      // Search
+      searchBtn.addEventListener('click', performSearch);
+      searchInput.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') performSearch();
+      });
+
+      // Filters
+      statusFilter.addEventListener('change', applyFilters);
+      dateFilter.addEventListener('change', applyFilters);
+      clearFiltersBtn.addEventListener('click', clearFilters);
+
+      // PDF Download
+      downloadPdfBtn.addEventListener('click', generatePDF);
+
+      // Form submission
+      batchForm.addEventListener('submit', handleBatchFormSubmit);
+
+      // Delete confirmation
+      confirmDeleteBtn.addEventListener('click', handleDeleteBatch);
+
+      // Close modal when clicking outside
+      window.addEventListener('click', (e) => {
+          if (e.target.classList.contains('modal')) {
+              closeModal(e.target.id);
+          }
+      });
+
+      // Date validation for start and end dates
+      document.getElementById('modalStartDate').addEventListener('change', validateDates);
+      document.getElementById('modalEndDate').addEventListener('change', validateDates);
+  }
+
+  function setupSidebar() {
+      const menuBar = document.querySelector('#content nav .bx.bx-menu');
+      const sidebar = document.getElementById('sidebar');
+      const allSideMenu = document.querySelectorAll('#sidebar .side-menu.top li a');
+      const searchButton = document.querySelector('#content nav form .form-input button');
+      const searchButtonIcon = document.querySelector('#content nav form .form-input button .bx');
+      const searchForm = document.querySelector('#content nav form');
+      const switchMode = document.getElementById('switch-mode');
+
+      // Toggle sidebar
+      if (menuBar) {
+          menuBar.addEventListener('click', function() {
+              sidebar.classList.toggle('hide');
+          });
+      }
+
+      // Sidebar menu active state
+      if (allSideMenu.length > 0) {
+          allSideMenu.forEach(item => {
+              const li = item.parentElement;
+              item.addEventListener('click', function(e) {
+                  e.preventDefault();
+                  allSideMenu.forEach(i => {
+                      i.parentElement.classList.remove('active');
+                  });
+                  li.classList.add('active');
+              });
+          });
+      }
+
+      // Search functionality
+      if (searchButton) {
+          searchButton.addEventListener('click', function(e) {
+              if (window.innerWidth < 576) {
+                  e.preventDefault();
+                  searchForm.classList.toggle('show');
+                  if (searchForm.classList.contains('show')) {
+                      searchButtonIcon.classList.replace('bx-search', 'bx-x');
+                  } else {
+                      searchButtonIcon.classList.replace('bx-x', 'bx-search');
+                  }
+              }
+          });
+      }
+
+      // Dark mode toggle
+      if (switchMode) {
+          switchMode.addEventListener('change', function() {
+              if (this.checked) {
+                  document.body.classList.add('dark');
+                  localStorage.setItem('darkMode', 'true');
+              } else {
+                  document.body.classList.remove('dark');
+                  localStorage.setItem('darkMode', 'false');
+              }
+          });
+      }
+
+      // Load dark mode preference
+      if (localStorage.getItem('darkMode') === 'true') {
+          document.body.classList.add('dark');
+          switchMode.checked = true;
+      }
+
+      // Responsive sidebar
+      if (window.innerWidth < 768) {
+          sidebar.classList.add('hide');
+      } else if (window.innerWidth > 576) {
+          if (searchButtonIcon) {
+              searchButtonIcon.classList.replace('bx-x', 'bx-search');
+              if (searchForm) searchForm.classList.remove('show');
+          }
+      }
+
+      window.addEventListener('resize', function() {
+          if (this.innerWidth > 576 && searchButtonIcon) {
+              searchButtonIcon.classList.replace('bx-x', 'bx-search');
+              if (searchForm) searchForm.classList.remove('show');
+          }
+      });
+  }
+
+  // ==================== DATE VALIDATION ====================
+  function validateDates() {
+      const startDateInput = document.getElementById('modalStartDate');
+      const endDateInput = document.getElementById('modalEndDate');
+      const startDateError = document.getElementById('startDateError');
+      const endDateError = document.getElementById('endDateError');
+
+      // Clear previous errors
+      startDateError.style.display = 'none';
+      endDateError.style.display = 'none';
+
+      const startDate = new Date(startDateInput.value);
+      const endDate = endDateInput.value ? new Date(endDateInput.value) : null;
+
+      // Validate start date (cannot be in the future)
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      if (startDate > today) {
+          startDateError.textContent = 'Start date cannot be in the future';
+          startDateError.style.display = 'block';
+          return false;
+      }
+
+      // Validate end date if provided
+      if (endDate) {
+          if (endDate < startDate) {
+              endDateError.textContent = 'End date cannot be before start date';
+              endDateError.style.display = 'block';
+              return false;
+          }
+
+          if (endDate > today) {
+              endDateError.textContent = 'End date cannot be in the future';
+              endDateError.style.display = 'block';
+              return false;
+          }
+      }
+
+      return true;
+  }
+
+  // Load Batches from API
+  async function loadBatches() {
+      try {
+          showLoading();
+
+          const response = await fetch(BATCHES_API, {
+              method: 'GET',
+              headers: {
+                  'Accept': 'application/json',
+                  'Content-Type': 'application/json'
+              }
+          });
+
+          if (!response.ok) {
+              throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+
+          const batches = await response.json();
+          console.log('Loaded batches:', batches);
+
+          allBatches = batches;
+          filteredBatches = [...batches];
+
+          updateStats(batches);
+          displayBatches(filteredBatches);
+          hideLoading();
+
+          if (batches.length === 0) {
+              showToast('No batches found. Add a new batch to get started.', 'info');
+          } else {
+              showToast(`Loaded ${batches.length} batches`, 'success');
+          }
+      } catch (error) {
+          console.error('Error loading batches:', error);
+          hideLoading();
+          showToast('Error loading batches: ' + error.message, 'error');
+          setTimeout(() => {
+              useMockData();
+          }, 1000);
+      }
+  }
+
+  // Fallback to mock data
+  function useMockData() {
+      console.log('Using mock data for testing...');
+      const mockBatches = generateMockBatches();
+      allBatches = mockBatches;
+      filteredBatches = [...mockBatches];
+      updateStats(mockBatches);
+      displayBatches(filteredBatches);
+      showToast('Using mock data for demonstration', 'info');
+  }
+
+  // Display Batches in Table
+  function displayBatches(batches) {
+      batchTableBody.innerHTML = '';
+
+      if (batches.length === 0) {
+          batchTable.style.display = 'none';
+          emptyState.style.display = 'block';
+          recordCount.textContent = '0 records found';
+          return;
+      }
+
+      batchTable.style.display = 'table';
+      emptyState.style.display = 'none';
+      recordCount.textContent = `${batches.length} records found`;
+
+      batches.forEach(batch => {
+          const tr = document.createElement('tr');
+
+          // Format dates
+          const startDate = batch.startDate ?
+              new Date(batch.startDate).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric'
+              }) : 'N/A';
+
+          const endDate = batch.endDate ?
+              new Date(batch.endDate).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric'
+              }) : '-';
+
+          // Get badge class based on status
+          const statusText = batch.status ? batch.status.replace('_', ' ').toLowerCase() : '';
+          const badgeClass = statusText.replace(' ', '-');
+
+          tr.innerHTML = `
+              <td>${batch.id || 'N/A'}</td>
+              <td><strong>${batch.batchNumber || 'N/A'}</strong></td>
+              <td><span class="badge ${badgeClass}">${batch.status ? batch.status.replace('_', ' ') : 'N/A'}</span></td>
+              <td>${batch.productType || 'N/A'}</td>
+              <td>${batch.productQuantity || '0'}</td>
+              <td>${startDate}</td>
+              <td>${endDate}</td>
+              <td class="actions">
+                  <button class="edit" onclick="editBatch(${batch.id})">
+                      <i class='bx bx-edit'></i> Edit
+                  </button>
+                  <button class="delete" onclick="openDeleteModal(${batch.id})">
+                      <i class='bx bx-trash'></i> Delete
+                  </button>
+              </td>
+          `;
+          batchTableBody.appendChild(tr);
+      });
+  }
+
+  // Update Statistics
+  function updateStats(batches) {
+      const total = batches.length;
+      const inProgress = batches.filter(b => b.status === 'IN_PROGRESS').length;
+      const qcPending = batches.filter(b => b.status === 'QC_PENDING').length;
+      const completed = batches.filter(b => b.status === 'COMPLETED').length;
+      const archived = batches.filter(b => b.status === 'ARCHIVED').length;
+
+      inProgressCount.textContent = inProgress;
+      qcPendingCount.textContent = qcPending;
+      completedCount.textContent = completed;
+      archivedCount.textContent = archived;
+      notificationCount.textContent = qcPending; // Show QC pending as notifications
+  }
+
+  // Apply Filters
+  function applyFilters() {
+      let filtered = [...allBatches];
+
+      // Status filter
+      const status = statusFilter.value;
+      if (status !== 'all') {
+          filtered = filtered.filter(b => b.status === status);
+      }
+
+      // Date filter
+      const dateRange = dateFilter.value;
+      if (dateRange !== 'all') {
+          const now = new Date();
+          filtered = filtered.filter(b => {
+              if (!b.startDate) return false;
+
+              const startDate = new Date(b.startDate);
+
+              switch (dateRange) {
+                  case 'today':
+                      return startDate.toDateString() === now.toDateString();
+                  case 'week':
+                      const weekAgo = new Date(now);
+                      weekAgo.setDate(now.getDate() - 7);
+                      return startDate >= weekAgo;
+                  case 'month':
+                      const monthAgo = new Date(now);
+                      monthAgo.setMonth(now.getMonth() - 1);
+                      return startDate >= monthAgo;
+                  case 'quarter':
+                      const quarterAgo = new Date(now);
+                      quarterAgo.setMonth(now.getMonth() - 3);
+                      return startDate >= quarterAgo;
+                  default:
+                      return true;
+              }
+          });
+      }
+
+      // Search filter
+      const searchTerm = searchInput.value.trim().toLowerCase();
+      if (searchTerm) {
+          filtered = filtered.filter(b =>
+              (b.batchNumber && b.batchNumber.toLowerCase().includes(searchTerm)) ||
+              (b.productType && b.productType.toLowerCase().includes(searchTerm))
+          );
+      }
+
+      filteredBatches = filtered;
+      displayBatches(filteredBatches);
+
+      if (filtered.length === 0) {
+          showToast('No batches found matching your criteria.', 'info');
+      }
+  }
+
+  // Filter by clicking on stat cards
+  function filterByStatus(status) {
+      statusFilter.value = status;
+      applyFilters();
+      showToast(`Filtered by: ${status.replace('_', ' ')}`, 'info');
+  }
+
+  // Perform Search
+  function performSearch() {
+      applyFilters();
+      if (searchInput.value.trim()) {
+          showToast(`Found ${filteredBatches.length} batches matching "${searchInput.value}"`, 'info');
+      }
+  }
+
+  // Clear Filters
+  function clearFilters() {
+      statusFilter.value = 'all';
+      dateFilter.value = 'all';
+      searchInput.value = '';
+      filteredBatches = [...allBatches];
+      displayBatches(filteredBatches);
+      showToast('Filters cleared', 'info');
+  }
+
+  // ==================== MODAL FUNCTIONS ====================
+  function openAddModal() {
+      isEditing = false;
+      currentBatchId = null;
+      modalTitle.textContent = 'Add New Batch';
+      modalSaveButton.innerHTML = '<i class="bx bx-save"></i> Save Batch';
+      batchForm.reset();
+
+      // Clear error messages
+      clearErrorMessages();
+
+      // Set default date to today
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('modalStartDate').value = today;
+
+      openModal('batchModal');
+  }
+
+  function editBatch(id) {
+      isEditing = true;
+      currentBatchId = id;
+      modalTitle.textContent = 'Edit Batch';
+      modalSaveButton.innerHTML = '<i class="bx bx-save"></i> Update Batch';
+
+      // Clear error messages
+      clearErrorMessages();
+
+      const batch = allBatches.find(b => b.id == id);
+      if (batch) {
+          document.getElementById('batchId').value = batch.id;
+          document.getElementById('modalBatchNumber').value = batch.batchNumber || '';
+          document.getElementById('modalProductType').value = batch.productType || '';
+          document.getElementById('modalStartDate').value = batch.startDate || '';
+          document.getElementById('modalEndDate').value = batch.endDate || '';
+          document.getElementById('modalProductQuantity').value = batch.productQuantity || '';
+          document.getElementById('modalStatus').value = batch.status || 'IN_PROGRESS';
+      }
+
+      openModal('batchModal');
+  }
+
+  function openDeleteModal(id) {
+      const batch = allBatches.find(b => b.id == id);
+      if (batch) {
+          batchToDelete = id;
+          const details = document.getElementById('deleteItemDetails');
+          details.innerHTML = `
+              <strong>Batch Number:</strong> ${batch.batchNumber || 'N/A'}<br>
+              <strong>Product Type:</strong> ${batch.productType || 'N/A'}<br>
+              <strong>Status:</strong> ${batch.status ? batch.status.replace('_', ' ') : 'N/A'}
+          `;
+          openModal('deleteModal');
+      }
+  }
+
+  function openModal(modalId) {
+      const modal = document.getElementById(modalId);
+      if (modal) {
+          modal.style.display = 'flex';
+      }
+  }
+
+  function closeModal(modalId) {
+      const modal = document.getElementById(modalId);
+      if (modal) {
+          modal.style.display = 'none';
+      }
+
+      // Reset forms and clear errors
+      if (modalId === 'batchModal') {
+          batchForm.reset();
+          clearErrorMessages();
+          currentBatchId = null;
+      } else if (modalId === 'deleteModal') {
+          batchToDelete = null;
+      }
+  }
+
+  function clearErrorMessages() {
+      const errorMessages = document.querySelectorAll('.error-message');
+      errorMessages.forEach(error => {
+          error.textContent = '';
+          error.style.display = 'none';
+      });
+  }
+
+  // Handle Batch Form Submission
+  async function handleBatchFormSubmit(e) {
+      e.preventDefault();
+
+      // Validate dates first
+      if (!validateDates()) {
+          return;
+      }
+
+      // Validate other fields
+      const batchNumber = document.getElementById('modalBatchNumber').value.trim();
+      const productType = document.getElementById('modalProductType').value.trim();
+      const productQuantity = parseInt(document.getElementById('modalProductQuantity').value);
+
+      let isValid = true;
+
+      // Clear all errors
+      clearErrorMessages();
+
+      // Validate batch number
+      if (!batchNumber) {
+          document.getElementById('batchNumberError').textContent = 'Batch number is required';
+          document.getElementById('batchNumberError').style.display = 'block';
+          isValid = false;
+      }
+
+      // Validate product type
+      if (!productType) {
+          document.getElementById('productTypeError').textContent = 'Product type is required';
+          document.getElementById('productTypeError').style.display = 'block';
+          isValid = false;
+      }
+
+      // Validate quantity
+      if (!productQuantity || productQuantity < 1) {
+          document.getElementById('quantityError').textContent = 'Quantity must be at least 1';
+          document.getElementById('quantityError').style.display = 'block';
+          isValid = false;
+      }
+
+      if (!isValid) {
+          return;
+      }
+
+      const batchData = {
+          batchNumber: batchNumber,
+          startDate: document.getElementById('modalStartDate').value,
+          endDate: document.getElementById('modalEndDate').value || null,
+          productQuantity: productQuantity,
+          productType: productType,
+          status: document.getElementById('modalStatus').value
+      };
+
+      try {
+          if (isEditing && currentBatchId) {
+              // Update existing batch
+              const response = await fetch(`${BATCHES_API}/${currentBatchId}`, {
+                  method: 'PUT',
+                  headers: {
+                      'Accept': 'application/json',
+                      'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify(batchData)
+              });
+
+              if (!response.ok) {
+                  throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+              }
+
+              showToast('Batch updated successfully!', 'success');
+          } else {
+              // Create new batch
+              const response = await fetch(BATCHES_API, {
+                  method: 'POST',
+                  headers: {
+                      'Accept': 'application/json',
+                      'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify(batchData)
+              });
+
+              if (!response.ok) {
+                  throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+              }
+
+              showToast('Batch created successfully!', 'success');
+          }
+
+          closeModal('batchModal');
+          await loadBatches();
+      } catch (error) {
+          console.error('Error saving batch:', error);
+          showToast('Error saving batch: ' + error.message, 'error');
+      }
+  }
+
+  // Handle Delete Batch
+  async function handleDeleteBatch() {
+      if (!batchToDelete) return;
+
+      try {
+          const response = await fetch(`${BATCHES_API}/${batchToDelete}`, {
+              method: 'DELETE'
+          });
+
+          if (!response.ok) {
+              throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+
+          showToast('Batch deleted successfully!', 'success');
+          closeModal('deleteModal');
+          await loadBatches();
+      } catch (error) {
+          console.error('Error deleting batch:', error);
+          showToast('Error deleting batch: ' + error.message, 'error');
+      }
+  }
+
+  // ==================== PDF GENERATION ====================
+  async function generatePDF() {
+      try {
+          // Disable button and show spinner
+          downloadPdfBtn.disabled = true;
+          pdfText.textContent = 'Generating PDF...';
+          pdfSpinner.style.display = 'inline-block';
+
+          // Ensure logo is loaded
+          if (!logoLoaded) {
+              await preloadLogo();
+          }
+
+          // Get current data
+          const data = filteredBatches.length > 0 ? filteredBatches : allBatches;
+
+          if (data.length === 0) {
+              showToast('No data to export to PDF', 'warning');
+              resetPDFButton();
+              return;
+          }
+
+          // Prepare PDF content
+          preparePDFContent(data);
+
+          // Wait for logo to be ready
+          await new Promise(resolve => setTimeout(resolve, 500));
+
+          // Generate PDF using html2canvas and jsPDF
+          const pdfContainer = document.getElementById('pdf-container');
+          pdfContainer.style.display = 'block';
+
+          // Use html2canvas to capture the PDF container
+          const canvas = await html2canvas(pdfContainer, {
+              scale: 2,
+              useCORS: true,
+              logging: false,
+              backgroundColor: '#ffffff'
+          });
+
+          const imgData = canvas.toDataURL('image/jpeg', 1.0);
+          const pdf = new jspdf.jsPDF({
+              orientation: 'portrait',
+              unit: 'mm',
+              format: 'a4'
+          });
+
+          const imgWidth = 210; // A4 width in mm
+          const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+          pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
+
+          // Save the PDF
+          const fileName = `Batch-Report-${new Date().toISOString().split('T')[0]}.pdf`;
+          pdf.save(fileName);
+
+          // Hide PDF container
+          pdfContainer.style.display = 'none';
+
+          showToast(`PDF exported successfully! (${data.length} batches)`, 'success');
+
+      } catch (error) {
+          console.error('Error generating PDF:', error);
+          showToast('Error generating PDF: ' + error.message, 'error');
+
+          // Fallback: Generate simple PDF without logo
+          try {
+              generateSimplePDF();
+          } catch (fallbackError) {
+              console.error('Fallback PDF generation failed:', fallbackError);
+          }
+
+      } finally {
+          resetPDFButton();
+      }
+  }
+
+  // Prepare PDF Content
+  function preparePDFContent(data) {
+      const now = new Date();
+      const formattedDate = now.toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+      });
+
+      // Update report date
+      document.getElementById('pdf-report-date').textContent = `Report Date: ${formattedDate}`;
+
+      // Update generated by
+      const userName = `${currentUser.firstName || 'Admin'} ${currentUser.lastName || ''}`.trim();
+      document.getElementById('pdf-generated-by').textContent = `Generated by: ${userName}`;
+
+      // Update statistics
+      updatePDFStatistics(data);
+
+      // Update table
+      updatePDFTable(data);
+  }
+
+  // Update PDF Statistics
+  function updatePDFStatistics(data) {
+      const statsContainer = document.getElementById('pdf-statistics');
+
+      const inProgress = data.filter(b => b.status === 'IN_PROGRESS').length;
+      const qcPending = data.filter(b => b.status === 'QC_PENDING').length;
+      const completed = data.filter(b => b.status === 'COMPLETED').length;
+      const archived = data.filter(b => b.status === 'ARCHIVED').length;
+
+      statsContainer.innerHTML = `
+          <div class="pdf-stat-box">
+              <div class="pdf-stat-value">${data.length}</div>
+              <div class="pdf-stat-label">Total Batches</div>
+          </div>
+          <div class="pdf-stat-box">
+              <div class="pdf-stat-value" style="color: #0ea5e9;">${inProgress}</div>
+              <div class="pdf-stat-label">In Progress</div>
+          </div>
+          <div class="pdf-stat-box">
+              <div class="pdf-stat-value" style="color: #f59e0b;">${qcPending}</div>
+              <div class="pdf-stat-label">QC Pending</div>
+          </div>
+          <div class="pdf-stat-box">
+              <div class="pdf-stat-value" style="color: #16a34a;">${completed}</div>
+              <div class="pdf-stat-label">Completed</div>
+          </div>
+      `;
+  }
+
+  // Update PDF Table
+  function updatePDFTable(data) {
+      const tableBody = document.getElementById('pdf-table-body');
+      let html = '';
+
+      data.forEach((batch, index) => {
+          // Format dates
+          const startDate = batch.startDate ?
+              new Date(batch.startDate).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric'
+              }) : 'N/A';
+
+          const endDate = batch.endDate ?
+              new Date(batch.endDate).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric'
+              }) : '-';
+
+          html += `
+              <tr>
+                  <td>${batch.id || index + 1}</td>
+                  <td><strong>${batch.batchNumber || 'N/A'}</strong></td>
+                  <td>${batch.status ? batch.status.replace('_', ' ') : 'N/A'}</td>
+                  <td>${batch.productType || 'N/A'}</td>
+                  <td>${batch.productQuantity || '0'}</td>
+                  <td>${startDate}</td>
+                  <td>${endDate}</td>
+              </tr>
+          `;
+      });
+
+      tableBody.innerHTML = html;
+  }
+
+  // Generate Simple PDF (fallback)
+  function generateSimplePDF() {
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF();
+
+      const data = filteredBatches.length > 0 ? filteredBatches : allBatches;
+
+      // Add title
+      pdf.setFontSize(18);
+      pdf.setTextColor(45, 79, 43); // Dark green
+      pdf.text('Production Batches Report', 20, 20);
+
+      // Add date
+      pdf.setFontSize(10);
+      pdf.setTextColor(100, 100, 100);
+      pdf.text(`Generated: ${new Date().toLocaleDateString()}`, 20, 30);
+
+      // Add statistics
+      pdf.setFontSize(12);
+      pdf.setTextColor(0, 0, 0);
+      pdf.text(`Total Batches: ${data.length}`, 20, 40);
+
+      // Prepare table data
+      const tableData = data.map(batch => {
+          const startDate = batch.startDate ?
+              new Date(batch.startDate).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric'
+              }) : 'N/A';
+
+          const endDate = batch.endDate ?
+              new Date(batch.endDate).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric'
+              }) : '-';
+
+          return [
+              batch.id || '',
+              batch.batchNumber || 'N/A',
+              batch.status ? batch.status.replace('_', ' ') : 'N/A',
+              batch.productType || 'N/A',
+              batch.productQuantity || '0',
+              startDate,
+              endDate
+          ];
+      });
+
+      // Add table
+      pdf.autoTable({
+          head: [['ID', 'Batch Number', 'Status', 'Product Type', 'Quantity', 'Start Date', 'End Date']],
+          body: tableData,
+          startY: 50,
+          theme: 'grid',
+          headStyles: { fillColor: [45, 79, 43] },
+          margin: { top: 50 }
+      });
+
+      // Add footer
+      pdf.setFontSize(8);
+      pdf.setTextColor(150, 150, 150);
+      const pageCount = pdf.internal.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+          pdf.setPage(i);
+          pdf.text(`ProTrack Batch Report - Page ${i} of ${pageCount}`, pdf.internal.pageSize.width / 2, pdf.internal.pageSize.height - 10, { align: 'center' });
+      }
+
+      // Save PDF
+      const fileName = `Batch-Report-${new Date().toISOString().split('T')[0]}.pdf`;
+      pdf.save(fileName);
+
+      showToast('PDF generated using fallback method', 'info');
+  }
+
+  // Reset PDF Button
+  function resetPDFButton() {
+      downloadPdfBtn.disabled = false;
+      pdfText.textContent = 'Download PDF';
+      pdfSpinner.style.display = 'none';
+  }
+
+  // Export to Excel
+  function exportToExcel() {
+      if (filteredBatches.length === 0) {
+          showToast('No data to export', 'warning');
+          return;
+      }
+
+      try {
+          // Create CSV content
+          const headers = ['ID', 'Batch Number', 'Status', 'Product Type', 'Quantity', 'Start Date', 'End Date'];
+          const rows = filteredBatches.map(batch => [
+              batch.id || '',
+              batch.batchNumber || '',
+              batch.status || '',
+              batch.productType || '',
+              batch.productQuantity || '',
+              batch.startDate ? new Date(batch.startDate).toLocaleDateString() : '',
+              batch.endDate ? new Date(batch.endDate).toLocaleDateString() : ''
+          ]);
+
+          const csvContent = [
+              headers.join(','),
+              ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+          ].join('\n');
+
+          // Create blob and download
+          const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+          const link = document.createElement('a');
+          const url = URL.createObjectURL(blob);
+
+          link.setAttribute('href', url);
+          link.setAttribute('download', `batch_report_${new Date().toISOString().split('T')[0]}.csv`);
+          link.style.visibility = 'hidden';
+
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+
+          showToast('Excel file exported successfully!', 'success');
+      } catch (error) {
+          console.error('Error exporting to Excel:', error);
+          showToast('Error exporting to Excel: ' + error.message, 'error');
+      }
+  }
+
+  // Show Toast Notification
+  function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+
+      // Remove existing toast
+      const existingToast = document.querySelector('.toast');
+      if (existingToast) {
+          existingToast.remove();
+      }
+
+      // Create new toast
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+
+      // Add icon based on type
+      let icon = 'bx-info-circle';
+      if (type === 'success') icon = 'bx-check-circle';
+      if (type === 'error') icon = 'bx-error-circle';
+      if (type === 'warning') icon = 'bx-error';
+      if (type === 'info') icon = 'bx-info-circle';
+
+      toast.innerHTML = `
+          <i class='bx ${icon}'></i>
+          <span>${message}</span>
+      `;
+
+      container.appendChild(toast);
+
+      // Auto remove after 5 seconds
+      setTimeout(() => {
+          if (toast.parentNode) {
+              toast.style.animation = 'slideOutRight 0.3s ease';
+              setTimeout(() => {
+                  if (toast.parentNode) {
+                      toast.remove();
+                  }
+              }, 300);
+          }
+      }, 5000);
+  }
+
+  // Show Alert
+  function showAlert(message, type) {
+      alertBox.textContent = message;
+      alertBox.className = `alert alert-${type}`;
+      alertBox.style.display = 'block';
+
+      setTimeout(() => {
+          alertBox.style.display = 'none';
+      }, 3000);
+  }
+
+  // Show Loading
+  function showLoading() {
+      loadingIndicator.style.display = 'block';
+      batchTable.style.display = 'none';
+      emptyState.style.display = 'none';
+  }
+
+  // Hide Loading
+  function hideLoading() {
+      loadingIndicator.style.display = 'none';
+      batchTable.style.display = 'table';
+  }
+
+  // Mock Data Generation (for testing)
+  function generateMockBatches() {
+      const statuses = ['IN_PROGRESS', 'QC_PENDING', 'COMPLETED', 'ARCHIVED'];
+      const productTypes = ['Widget A', 'Widget B', 'Gadget X', 'Device Y', 'Tool Z'];
+
+      const batches = [];
+      for (let i = 1; i <= 15; i++) {
+          const status = statuses[Math.floor(Math.random() * statuses.length)];
+          const productType = productTypes[Math.floor(Math.random() * productTypes.length)];
+          const startDate = new Date();
+          startDate.setDate(startDate.getDate() - Math.floor(Math.random() * 60));
+
+          const batch = {
+              id: i,
+              batchNumber: `BATCH-2024-${String(i).padStart(3, '0')}`,
+              status: status,
+              productType: productType,
+              productQuantity: Math.floor(Math.random() * 1000) + 100,
+              startDate: startDate.toISOString().split('T')[0],
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+          };
+
+          // Add end date for completed or archived batches
+          if (status === 'COMPLETED' || status === 'ARCHIVED') {
+              const endDate = new Date(startDate);
+              endDate.setDate(endDate.getDate() + Math.floor(Math.random() * 30) + 1);
+              batch.endDate = endDate.toISOString().split('T')[0];
+          }
+
+          batches.push(batch);
+      }
+
+      return batches;
+  }
+
+  // Export functions for onclick handlers
+  window.filterByStatus = filterByStatus;
+  window.openAddModal = openAddModal;
+  window.editBatch = editBatch;
+  window.openDeleteModal = openDeleteModal;
+  window.closeModal = closeModal;
+  window.exportToExcel = exportToExcel;
+</script>
+</body>
+</html>

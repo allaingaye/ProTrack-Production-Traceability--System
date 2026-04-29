@@ -1,0 +1,1819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Boxicons -->
+    <link href='https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css' rel='stylesheet'>
+    <!-- jsPDF and html2canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Poppins:wght@400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        li {
+            list-style: none;
+        }
+
+        :root {
+            --poppins: 'Poppins', sans-serif;
+            --lato: 'Lato', sans-serif;
+            --light: #F9F9F9;
+            --blue: #2D4F2B;
+            --light-blue: #E8F5E9;
+            --grey: #eee;
+            --dark-grey: #AAAAAA;
+            --dark: #342E37;
+            --red: #DB504A;
+            --yellow: #FFCE26;
+            --light-yellow: #FFF2C6;
+            --orange: #FD7238;
+            --light-orange: #FFE0D3;
+        }
+
+        html {
+            overflow-x: hidden;
+        }
+
+        body.dark {
+            --light: #0C0C1E;
+            --grey: #060714;
+            --dark: #FBFBFB;
+        }
+
+        body {
+            background: var(--grey);
+            overflow-x: hidden;
+        }
+
+        /* SIDEBAR */
+        #sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 280px;
+            height: 100%;
+            background: var(--light);
+            z-index: 2000;
+            font-family: var(--lato);
+            transition: .3s ease;
+            overflow-x: hidden;
+            scrollbar-width: none;
+        }
+        #sidebar::--webkit-scrollbar {
+            display: none;
+        }
+        #sidebar.hide {
+            width: 60px;
+        }
+        #sidebar .brand {
+            font-size: 24px;
+            font-weight: 700;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            color: var(--blue);
+            position: sticky;
+            top: 0;
+            left: 0;
+            background: var(--light);
+            z-index: 500;
+            padding-bottom: 20px;
+            box-sizing: content-box;
+        }
+        #sidebar .brand .bx {
+            min-width: 60px;
+            display: flex;
+            justify-content: center;
+        }
+        #sidebar .side-menu {
+            width: 100%;
+            margin-top: 48px;
+        }
+        #sidebar .side-menu li {
+            height: 48px;
+            background: transparent;
+            margin-left: 6px;
+            border-radius: 48px 0 0 48px;
+            padding: 4px;
+        }
+        #sidebar .side-menu li.active {
+            background: var(--grey);
+            position: relative;
+        }
+        #sidebar .side-menu li.active::before {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            top: -40px;
+            right: 0;
+            box-shadow: 20px 20px 0 var(--grey);
+            z-index: -1;
+        }
+        #sidebar .side-menu li.active::after {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            bottom: -40px;
+            right: 0;
+            box-shadow: 20px -20px 0 var(--grey);
+            z-index: -1;
+        }
+        #sidebar .side-menu li a {
+            width: 100%;
+            height: 100%;
+            background: var(--light);
+            display: flex;
+            align-items: center;
+            border-radius: 48px;
+            font-size: 16px;
+            color: var(--dark);
+            white-space: nowrap;
+            overflow-x: hidden;
+        }
+        #sidebar .side-menu.top li.active a {
+            color: var(--blue);
+        }
+        #sidebar.hide .side-menu li a {
+            width: calc(48px - (4px * 2));
+            transition: width .3s ease;
+        }
+        #sidebar .side-menu li a.logout {
+            color: var(--red);
+        }
+        #sidebar .side-menu.top li a:hover {
+            color: var(--blue);
+        }
+        #sidebar .side-menu li a .bx {
+            min-width: calc(60px  - ((4px + 6px) * 2));
+            display: flex;
+            justify-content: center;
+        }
+
+        /* CONTENT */
+        #content {
+            position: relative;
+            width: calc(100% - 280px);
+            left: 280px;
+            transition: .3s ease;
+        }
+        #sidebar.hide ~ #content {
+            width: calc(100% - 60px);
+            left: 60px;
+        }
+
+        /* NAVBAR */
+        #content nav {
+            height: 56px;
+            background: var(--light);
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            grid-gap: 24px;
+            font-family: var(--lato);
+            position: sticky;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+        #content nav::before {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            bottom: -40px;
+            left: 0;
+            border-radius: 50%;
+            box-shadow: -20px -20px 0 var(--light);
+        }
+        #content nav a {
+            color: var(--dark);
+        }
+        #content nav .bx.bx-menu {
+            cursor: pointer;
+            color: var(--dark);
+        }
+        #content nav .nav-link {
+            font-size: 16px;
+            transition: .3s ease;
+        }
+        #content nav .nav-link:hover {
+            color: var(--blue);
+        }
+        #content nav form {
+            max-width: 400px;
+            width: 100%;
+            margin-right: auto;
+        }
+        #content nav form .form-input {
+            display: flex;
+            align-items: center;
+            height: 36px;
+        }
+        #content nav form .form-input input {
+            flex-grow: 1;
+            padding: 0 16px;
+            height: 100%;
+            border: none;
+            background: var(--grey);
+            border-radius: 36px 0 0 36px;
+            outline: none;
+            width: 100%;
+            color: var(--dark);
+        }
+        #content nav form .form-input button {
+            width: 36px;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: var(--blue);
+            color: var(--light);
+            font-size: 18px;
+            border: none;
+            outline: none;
+            border-radius: 0 36px 36px 0;
+            cursor: pointer;
+        }
+        #content nav .switch-mode {
+            display: block;
+            min-width: 50px;
+            height: 25px;
+            border-radius: 25px;
+            background: var(--grey);
+            cursor: pointer;
+            position: relative;
+        }
+        #content nav .switch-mode::before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            bottom: 2px;
+            width: calc(25px - 4px);
+            background: var(--blue);
+            border-radius: 50%;
+            transition: all .3s ease;
+        }
+        #content nav #switch-mode:checked + .switch-mode::before {
+            left: calc(100% - (25px - 4px) - 2px);
+        }
+
+        /* User Profile in Navbar */
+        #content nav .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: auto;
+            padding: 6px 12px;
+            border-radius: 20px;
+            background: var(--grey);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #content nav .user-profile:hover {
+            background: var(--light-blue);
+        }
+
+        #content nav .user-profile .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--blue);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        #content nav .user-profile .user-email {
+            font-size: 14px;
+            color: var(--dark);
+            font-weight: 500;
+        }
+
+        /* MAIN */
+        #content main {
+            width: 100%;
+            padding: 36px 24px;
+            font-family: var(--poppins);
+            max-height: calc(100vh - 56px);
+            overflow-y: auto;
+        }
+        #content main .head-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            grid-gap: 16px;
+            flex-wrap: wrap;
+        }
+        #content main .head-title .left h1 {
+            font-size: 36px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+        #content main .head-title .left .breadcrumb {
+            display: flex;
+            align-items: center;
+            grid-gap: 16px;
+        }
+        #content main .head-title .left .breadcrumb li {
+            color: var(--dark);
+        }
+        #content main .head-title .left .breadcrumb li a {
+            color: var(--dark-grey);
+            pointer-events: none;
+        }
+        #content main .head-title .left .breadcrumb li a.active {
+            color: var(--blue);
+            pointer-events: unset;
+        }
+        #content main .head-title .btn-download {
+            height: 36px;
+            padding: 0 16px;
+            border-radius: 36px;
+            background: var(--blue);
+            color: var(--light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            grid-gap: 10px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        #content main .head-title .btn-download:hover {
+            background: #234020;
+            transform: translateY(-2px);
+        }
+
+        /* Box Info */
+        #content main .box-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            grid-gap: 24px;
+            margin-top: 36px;
+        }
+        #content main .box-info li {
+            padding: 24px;
+            background: var(--light);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            grid-gap: 24px;
+        }
+        #content main .box-info li .bx {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            font-size: 36px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #content main .box-info li:nth-child(1) .bx {
+            background: var(--light-blue);
+            color: var(--blue);
+        }
+        #content main .box-info li:nth-child(2) .bx {
+            background: var(--light-yellow);
+            color: var(--yellow);
+        }
+        #content main .box-info li:nth-child(3) .bx {
+            background: var(--light-orange);
+            color: var(--orange);
+        }
+        #content main .box-info li .text h3 {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        #content main .box-info li .text p {
+            color: var(--dark);
+        }
+
+        /* Table Data */
+        #content main .table-data {
+            display: flex;
+            flex-wrap: wrap;
+            grid-gap: 24px;
+            margin-top: 24px;
+            width: 100%;
+            color: var(--dark);
+        }
+        #content main .table-data > div {
+            border-radius: 20px;
+            background: var(--light);
+            padding: 24px;
+            overflow-x: auto;
+            flex-grow: 1;
+            flex-basis: 100%;
+        }
+        #content main .table-data .head {
+            display: flex;
+            align-items: center;
+            grid-gap: 16px;
+            margin-bottom: 24px;
+        }
+        #content main .table-data .head h3 {
+            margin-right: auto;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        #content main .table-data .head .bx {
+            cursor: pointer;
+        }
+        #content main .table-data .head .btn-add {
+            height: 36px;
+            padding: 0 20px;
+            border-radius: 36px;
+            background: var(--blue);
+            color: var(--light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            grid-gap: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            font-family: var(--poppins);
+            transition: all 0.3s ease;
+        }
+        #content main .table-data .head .btn-add:hover {
+            background: #234020;
+            transform: translateY(-2px);
+        }
+
+        #content main .table-data .order table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        #content main .table-data .order table th {
+            padding-bottom: 12px;
+            font-size: 13px;
+            text-align: left;
+            border-bottom: 1px solid var(--grey);
+        }
+        #content main .table-data .order table td {
+            padding: 16px 0;
+        }
+        #content main .table-data .order table tbody tr:hover {
+            background: var(--grey);
+        }
+
+        .low {
+            color: var(--red);
+            font-weight: bold;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-edit, .btn-delete {
+            padding: 6px 14px;
+            cursor: pointer;
+            border: none;
+            border-radius: 6px;
+            font-family: var(--poppins);
+            font-weight: 500;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-edit {
+            background: var(--orange);
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: #e66329;
+        }
+
+        .btn-delete {
+            background: var(--red);
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #c4423d;
+        }
+
+        /* Modal/Popup */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 3000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: var(--light);
+            margin: auto;
+            padding: 0;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            animation: slideDown 0.3s ease;
+        }
+
+        .modal-header {
+            padding: 24px;
+            background: var(--blue);
+            color: white;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-header h2 {
+            font-size: 22px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .close {
+            color: white;
+            font-size: 32px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .close:hover {
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--dark);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--grey);
+            border-radius: 8px;
+            font-family: var(--poppins);
+            font-size: 14px;
+            color: var(--dark);
+            background: var(--grey);
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            border-color: var(--blue);
+            background: var(--light);
+        }
+
+        .modal-footer {
+            padding: 20px 30px;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            border-top: 1px solid var(--grey);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            font-family: var(--poppins);
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-save {
+            background: var(--blue);
+            color: white;
+        }
+
+        .btn-save:hover {
+            background: #234020;
+            transform: translateY(-2px);
+        }
+
+        .btn-cancel {
+            background: var(--grey);
+            color: var(--dark);
+        }
+
+        .btn-cancel:hover {
+            background: var(--dark-grey);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* PDF container (hidden) */
+        #pdf-container {
+            position: fixed;
+            top: -9999px;
+            left: -9999px;
+            width: 794px; /* A4 width in pixels at 96 DPI */
+            padding: 40px;
+            background: white;
+            font-family: "Times New Roman", Times, serif;
+            z-index: 9999;
+        }
+
+        .pdf-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #2D4F2B;
+            position: relative;
+            background: linear-gradient(135deg, #E8F5E9 0%, #ffffff 100%);
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .pdf-logo {
+            height: 80px;
+            margin-bottom: 15px;
+            max-width: 200px;
+            object-fit: contain;
+        }
+
+        .pdf-title {
+            font-size: 28px;
+            color: #2D4F2B;
+            margin-bottom: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .pdf-subtitle {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .pdf-date {
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .pdf-generated-by {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .pdf-statistics {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            border: 1px solid #eee;
+        }
+
+        .stat-box {
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 1px solid #eee;
+        }
+
+        .stat-value {
+            font-size: 22px;
+            font-weight: bold;
+            color: #2D4F2B;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .pdf-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .pdf-table th {
+            background: #2D4F2B;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: bold;
+            border: 1px solid #ddd;
+        }
+
+        .pdf-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #eee;
+            border: 1px solid #ddd;
+            font-size: 11px;
+        }
+
+        .pdf-table tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        .pdf-footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            text-align: center;
+            font-size: 10px;
+            color: #666;
+        }
+
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 100px;
+            color: rgba(45, 79, 43, 0.05);
+            font-weight: bold;
+            pointer-events: none;
+            white-space: nowrap;
+            text-transform: uppercase;
+        }
+
+        /* PDF Download Button States */
+        .btn-download .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media screen and (max-width: 768px) {
+            #sidebar {
+                width: 200px;
+            }
+
+            #content {
+                width: calc(100% - 60px);
+                left: 200px;
+            }
+
+            #content nav .nav-link {
+                display: none;
+            }
+
+            #content nav .user-profile .user-email {
+                display: none;
+            }
+
+            .modal-content {
+                width: 95%;
+            }
+
+            .pdf-statistics {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media screen and (max-width: 576px) {
+            #content nav form .form-input input {
+                display: none;
+            }
+
+            #content nav form .form-input button {
+                width: auto;
+                height: auto;
+                background: transparent;
+                border-radius: none;
+                color: var(--dark);
+            }
+
+            #content nav form.show .form-input input {
+                display: block;
+                width: 100%;
+            }
+            #content nav form.show .form-input button {
+                width: 36px;
+                height: 100%;
+                border-radius: 0 36px 36px 0;
+                color: var(--light);
+                background: var(--red);
+            }
+
+            #content main .box-info {
+                grid-template-columns: 1fr;
+            }
+
+            .pdf-statistics {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
+    <title>Raw Materials - Operator Hub</title>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<section id="sidebar">
+    <a href="#" class="brand">
+        <i class='bx bxs-factory'></i>
+        <span class="text">Operator Hub</span>
+    </a>
+
+    <ul class="side-menu top">
+        <li ><a href="operator.html"><i class='bx bxs-dashboard'></i><span class="text">Dashboard</span></a></li>
+        <li class="active"><a href="opraw.html"><i class='bx bx-package'></i><span class="text">Raw Material</span></a></li>
+        <li><a href="opmat.html"><i class='bx bx-download'></i><span class="text">Material Intake</span></a></li>
+        <li><a href="opconsum.html"><i class='bx bx-upload'></i><span class="text">Material Consumption</span></a></li>
+        <li><a href="opstage.html"><i class='bx bx-git-branch'></i><span class="text">Production Stage</span></a></li>
+        <li><a href="oprtask.html"><i class='bx bx-task'></i><span class="text">Production Task</span></a></li>
+        <li><a href="oprbatch.html"><i class='bx bx-grid-alt'></i><span class="text">Production Batch</span></a></li>
+        <li><a href="opproduct.html"><i class='bx bx-cube'></i><span class="text">Product</span></a></li>
+        <li> <a href="opqccheck.html"><i class='bx bx-check-shield'></i><span class="text">QC Checkpoint</span></a></li>
+<!--        <li><a href="opaudit.html"><i class='bx bx-history'></i><span class="text">Audit Log</span></a></li>-->
+        <li><a href="try.html"><i class='bx bxs-bar-chart-alt-2'></i><span class="text">Statistiques</span></a></li>
+    </ul>
+
+
+    <ul class="side-menu">
+        <li>
+            <a href="index.html" class="logout">
+                <i class='bx bxs-log-out-circle'></i>
+                <span class="text">Logout</span>
+            </a>
+        </li>
+    </ul>
+</section>
+<!-- SIDEBAR -->
+
+<!-- CONTENT -->
+<section id="content">
+    <!-- NAVBAR -->
+    <nav>
+        <i class='bx bx-menu'></i>
+        <a href="#" class="nav-link">Categories</a>
+        <form action="#">
+            <div class="form-input">
+                <input type="search" placeholder="Search...">
+                <button type="submit" class="search-btn"><i class='bx bx-search'></i></button>
+            </div>
+        </form>
+
+        <!-- User Profile Section -->
+        <div class="user-profile" id="userProfile">
+            <div class="user-avatar" id="userAvatar">U</div>
+            <div class="user-email" id="userEmail">user@example.com</div>
+        </div>
+
+        <input type="checkbox" id="switch-mode" hidden>
+        <label for="switch-mode" class="switch-mode"></label>
+    </nav>
+    <!-- NAVBAR -->
+
+    <!-- MAIN -->
+    <main>
+        <div class="head-title">
+            <div class="left">
+                <h1>Raw Materials</h1>
+                <ul class="breadcrumb">
+                    <li>
+                        <a href="#">Dashboard</a>
+                    </li>
+                    <li><i class='bx bx-chevron-right'></i></li>
+                    <li>
+                        <a class="active" href="#">Raw Materials</a>
+                    </li>
+                </ul>
+            </div>
+            <button class="btn-download" id="downloadBtn">
+                <i class='bx bxs-cloud-download'></i>
+                <span class="text" id="exportText">Download PDF</span>
+                <span class="spinner" id="exportSpinner" style="display: none;"></span>
+            </button>
+        </div>
+
+        <ul class="box-info">
+            <li>
+                <i class='bx bxs-package'></i>
+                <span class="text">
+                    <h3 id="totalMaterials">0</h3>
+                    <p>Total Materials</p>
+                </span>
+            </li>
+            <li>
+                <i class='bx bxs-error'></i>
+                <span class="text">
+                    <h3 id="lowStock">0</h3>
+                    <p>Low Stock</p>
+                </span>
+            </li>
+            <li>
+                <i class='bx bxs-check-circle'></i>
+                <span class="text">
+                    <h3 id="goodStock">0</h3>
+                    <p>Good Stock</p>
+                </span>
+            </li>
+        </ul>
+
+        <div class="table-data">
+            <div class="order">
+                <div class="head">
+                    <h3>Materials List</h3>
+                    <button class="btn-add" onclick="openModal()">
+                        <i class='bx bx-plus'></i>
+                        <span>Add Material</span>
+                    </button>
+                </div>
+                <table>
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Unit</th>
+                        <th>Quantity</th>
+                        <th>Min Threshold</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody id="table"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+    <!-- MAIN -->
+</section>
+<!-- CONTENT -->
+
+<!-- MODAL -->
+<div id="materialModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>
+                <i class='bx bx-package'></i>
+                <span id="modalTitle">Add Material</span>
+            </h2>
+            <span class="close" onclick="closeModal()">&times;</span>
+        </div>
+        <form id="materialForm">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Material Name *</label>
+                    <input id="materialName" placeholder="Enter material name" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Unit *</label>
+                    <input id="materialUnit" placeholder="e.g., kg, L, pcs" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Current Quantity *</label>
+                    <input id="materialQuantity" placeholder="Enter quantity" type="number" step="0.01" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Minimum Threshold *</label>
+                    <input id="materialThreshold" placeholder="Minimum stock level" type="number" step="0.01" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-cancel" onclick="closeModal()">
+                    <i class='bx bx-x'></i>
+                    Cancel
+                </button>
+                <button type="submit" class="btn btn-save">
+                    <i class='bx bx-save'></i>
+                    <span id="btnText">Save Material</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Hidden PDF container -->
+<div id="pdf-container" style="display: none;">
+    <div class="pdf-header">
+        <div class="watermark">OPERATOR HUB - RAW MATERIALS</div>
+        <!-- Company Logo -->
+        <div style="text-align: center; margin-bottom: 15px;">
+            <img class="pdf-logo" id="pdf-logo" src="" alt="Company Logo">
+        </div>
+        <h1 class="pdf-title">Operator Hub</h1>
+        <div class="pdf-subtitle">Raw Materials Inventory Report</div>
+        <div class="pdf-date" id="pdf-report-date"></div>
+        <div class="pdf-generated-by" id="pdf-generated-by"></div>
+    </div>
+
+    <div class="pdf-statistics" id="pdf-statistics">
+        <!-- Statistics will be filled by JavaScript -->
+    </div>
+
+    <table class="pdf-table" id="pdf-table">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Unit</th>
+            <th>Quantity</th>
+            <th>Min Threshold</th>
+            <th>Status</th>
+        </tr>
+        </thead>
+        <tbody id="pdf-table-body">
+        <!-- Table data will be filled by JavaScript -->
+        </tbody>
+    </table>
+
+    <div class="pdf-footer">
+        <p><strong>Operator Hub - Factory Management System</strong></p>
+        <p>This report contains confidential information. Unauthorized distribution is prohibited.</p>
+        <p>Report generated from Operator Hub System | This is an official document</p>
+    </div>
+</div>
+
+<script>
+    // ===== USER MANAGEMENT =====
+    // Get user from localStorage or use default
+    function getCurrentUser() {
+        // In a real application, this would come from your authentication system
+        // For demo purposes, we'll use localStorage
+        const savedUser = localStorage.getItem('currentUser');
+        if (savedUser) {
+            return JSON.parse(savedUser);
+        }
+
+        // Default user for demo
+        const defaultUser = {
+            id: 1,
+            name: "John Operator",
+            email: "john.operator@factory.com",
+            role: "operator",
+            avatarLetter: "J"
+        };
+
+        // Save default user for future use
+        localStorage.setItem('currentUser', JSON.stringify(defaultUser));
+        return defaultUser;
+    }
+
+    // Display user information
+    function displayUserInfo() {
+        const user = getCurrentUser();
+        document.getElementById('userEmail').textContent = user.email;
+        document.getElementById('userAvatar').textContent = user.avatarLetter;
+
+        // Add hover effect to show full info
+        const userProfile = document.getElementById('userProfile');
+        userProfile.title = `${user.name}\n${user.email}\nRole: ${user.role}`;
+    }
+
+    // ===== PDF DOWNLOAD FUNCTIONALITY =====
+    const API = "http://localhost:1010/api/v1/raw-materials";
+    const LOGO_PATH = 'cs.jpg'; // Your logo file name
+    let materialsCache = [];
+    let logoImageData = null;
+    let logoLoaded = false;
+    let currentUser = null;
+
+    // Get PDF related elements
+    const downloadBtn = document.getElementById('downloadBtn');
+    const exportText = document.getElementById('exportText');
+    const exportSpinner = document.getElementById('exportSpinner');
+    const pdfLogo = document.getElementById('pdf-logo');
+
+    // Preload and convert logo to base64
+    function preloadAndConvertLogo() {
+        const img = new Image();
+        img.crossOrigin = "Anonymous"; // Important for CORS
+        img.src = LOGO_PATH + '?t=' + new Date().getTime(); // Add timestamp to prevent caching
+
+        img.onload = function() {
+            console.log('Logo loaded successfully from:', LOGO_PATH);
+
+            // Create canvas to convert image to base64
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            // Set canvas size to image size
+            canvas.width = img.width;
+            canvas.height = img.height;
+
+            // Draw image on canvas
+            ctx.drawImage(img, 0, 0);
+
+            // Convert to base64
+            logoImageData = canvas.toDataURL('image/jpeg'); // Changed to jpeg for cs.jpg
+            logoLoaded = true;
+            console.log('Logo converted to base64 successfully');
+
+            // Set the logo in PDF container
+            pdfLogo.src = logoImageData;
+        };
+
+        img.onerror = function(err) {
+            console.error('Error loading logo from path:', LOGO_PATH, err);
+            console.log('Attempting alternative paths...');
+
+            // Try alternative paths
+            const alternativePaths = [
+                'img/cs.jpg',
+                'images/cs.jpg',
+                './cs.jpg',
+                './img/cs.jpg',
+                './images/cs.jpg',
+                '../cs.jpg',
+                '../img/cs.jpg'
+            ];
+
+            let currentIndex = 0;
+            const tryNextPath = () => {
+                if (currentIndex >= alternativePaths.length) {
+                    // All paths failed, use fallback
+                    useFallbackLogo();
+                    return;
+                }
+
+                const altPath = alternativePaths[currentIndex];
+                console.log('Trying alternative path:', altPath);
+
+                const altImg = new Image();
+                altImg.crossOrigin = "Anonymous";
+                altImg.src = altPath + '?t=' + new Date().getTime();
+
+                altImg.onload = function() {
+                    console.log('Logo loaded from alternative path:', altPath);
+
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = altImg.width;
+                    canvas.height = altImg.height;
+                    ctx.drawImage(altImg, 0, 0);
+                    logoImageData = canvas.toDataURL('image/jpeg');
+                    logoLoaded = true;
+                    pdfLogo.src = logoImageData;
+                };
+
+                altImg.onerror = function() {
+                    currentIndex++;
+                    setTimeout(tryNextPath, 100);
+                };
+            };
+
+            tryNextPath();
+        };
+    }
+
+    // Use fallback logo if real logo not found
+    function useFallbackLogo() {
+        console.log('Using fallback logo');
+
+        // Create a canvas for the fallback logo
+        const canvas = document.createElement('canvas');
+        canvas.width = 200;
+        canvas.height = 100;
+        const ctx = canvas.getContext('2d');
+
+        // Draw green background
+        ctx.fillStyle = '#2D4F2B';
+        ctx.fillRect(0, 0, 200, 100);
+
+        // Draw white text
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'bold 24px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('OPERATOR', 100, 30);
+
+        ctx.font = '16px Arial';
+        ctx.fillText('HUB', 100, 60);
+
+        // Convert to base64
+        logoImageData = canvas.toDataURL('image/png');
+        logoLoaded = true;
+        pdfLogo.src = logoImageData;
+
+        // Also update the PDF container HTML with the fallback
+        const logoContainer = pdfLogo.parentElement;
+        logoContainer.innerHTML = `
+            <div style="display: inline-block; width: 200px; height: 100px;
+                        background: #2D4F2B; border-radius: 10px;
+                        display: flex; flex-direction: column; align-items: center;
+                        justify-content: center; color: white; font-weight: bold;
+                        margin: 0 auto 10px;">
+                <div style="font-size: 24px;">OPERATOR</div>
+                <div style="font-size: 16px;">HUB</div>
+            </div>
+        `;
+    }
+
+    // Prepare PDF content
+    function preparePDFContent(materials) {
+        // Set report date
+        const now = new Date();
+        const reportDate = now.toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        document.getElementById('pdf-report-date').textContent = `Report generated on: ${reportDate}`;
+
+        // Set generated by
+        const userEmail = currentUser?.email || 'System Operator';
+        const userName = currentUser?.name || 'Operator';
+        document.getElementById('pdf-generated-by').textContent = `Generated by: ${userName} (${userEmail})`;
+
+        // Ensure logo is set (use base64 data if available)
+        if (logoImageData) {
+            pdfLogo.src = logoImageData;
+        } else {
+            pdfLogo.src = LOGO_PATH;
+        }
+
+        // Update statistics in PDF
+        const totalCount = materials.length;
+        const lowStockCount = materials.filter(m => m.currentQuantity < m.minimumThreshold).length;
+        const goodStockCount = totalCount - lowStockCount;
+
+        const statsHtml = `
+            <div class="stat-box">
+                <div class="stat-value">${totalCount}</div>
+                <div class="stat-label">Total Materials</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">${lowStockCount}</div>
+                <div class="stat-label">Low Stock Items</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">${goodStockCount}</div>
+                <div class="stat-label">Good Stock Items</div>
+            </div>
+        `;
+
+        document.getElementById('pdf-statistics').innerHTML = statsHtml;
+
+        // Update table in PDF
+        const tableBody = document.getElementById('pdf-table-body');
+        tableBody.innerHTML = '';
+
+        if (materials.length === 0) {
+            const row = document.createElement('tr');
+            const cell = document.createElement('td');
+            cell.colSpan = 6;
+            cell.textContent = 'No materials found';
+            cell.style.textAlign = 'center';
+            cell.style.padding = '20px';
+            row.appendChild(cell);
+            tableBody.appendChild(row);
+        } else {
+            materials.forEach(material => {
+                const isLowStock = material.currentQuantity < material.minimumThreshold;
+                const row = document.createElement('tr');
+
+                row.innerHTML = `
+                    <td>${material.id}</td>
+                    <td>${material.name || 'N/A'}</td>
+                    <td>${material.unit || 'N/A'}</td>
+                    <td>${material.currentQuantity} ${material.unit}</td>
+                    <td>${material.minimumThreshold} ${material.unit}</td>
+                    <td style="font-weight: bold; color: ${isLowStock ? '#DB504A' : '#2D4F2B'};">${isLowStock ? 'LOW STOCK' : 'GOOD'}</td>
+                `;
+
+                tableBody.appendChild(row);
+            });
+        }
+    }
+
+    // Generate PDF report using html2canvas
+    async function generatePDFReport() {
+        try {
+            // Show loading state
+            exportText.textContent = 'Generating...';
+            exportSpinner.style.display = 'inline-block';
+            downloadBtn.disabled = true;
+
+            // Get materials data
+            const response = await fetch(API);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const materials = await response.json();
+            materialsCache = materials;
+
+            // Prepare PDF content
+            preparePDFContent(materials);
+
+            // Wait for logo to load if not already loaded
+            if (!logoLoaded) {
+                console.log('Waiting for logo to load...');
+                await new Promise(resolve => {
+                    const checkInterval = setInterval(() => {
+                        if (logoLoaded) {
+                            clearInterval(checkInterval);
+                            resolve();
+                        }
+                    }, 100);
+                    setTimeout(() => {
+                        clearInterval(checkInterval);
+                        resolve();
+                    }, 3000); // Max 3 seconds wait
+                });
+            }
+
+            // Create PDF using html2canvas and jsPDF
+            const pdfContainer = document.getElementById('pdf-container');
+
+            // Show the container temporarily
+            pdfContainer.style.display = 'block';
+            pdfContainer.style.position = 'absolute';
+            pdfContainer.style.top = '0';
+            pdfContainer.style.left = '0';
+
+            // Use html2canvas to capture the PDF container
+            const canvas = await html2canvas(pdfContainer, {
+                scale: 2,
+                useCORS: true,
+                logging: false,
+                backgroundColor: '#ffffff',
+                allowTaint: true,
+                onclone: function(clonedDoc) {
+                    // Ensure logo is set in the cloned document
+                    const clonedLogo = clonedDoc.getElementById('pdf-logo');
+                    if (clonedLogo && logoImageData) {
+                        clonedLogo.src = logoImageData;
+                    }
+                }
+            });
+
+            // Hide the container again
+            pdfContainer.style.display = 'none';
+            pdfContainer.style.position = 'fixed';
+            pdfContainer.style.top = '-9999px';
+            pdfContainer.style.left = '-9999px';
+
+            // Create PDF
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'mm', 'a4');
+
+            const imgData = canvas.toDataURL('image/png');
+            const imgWidth = 210; // A4 width in mm
+            const pageHeight = 297; // A4 height in mm
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+            let heightLeft = imgHeight;
+            let position = 0;
+
+            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+
+            // Add additional pages if needed
+            while (heightLeft > 0) {
+                position = heightLeft - imgHeight;
+                pdf.addPage();
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+            }
+
+            // Generate filename with timestamp
+            const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+            const filename = `Raw_Materials_Report_${timestamp}.pdf`;
+
+            // Save PDF
+            pdf.save(filename);
+
+            // Reset button state
+            exportText.textContent = 'Download PDF';
+            exportSpinner.style.display = 'none';
+            downloadBtn.disabled = false;
+
+            // Show success message
+            showNotification(`PDF report "${filename}" has been downloaded successfully!`, 'success');
+
+        } catch (error) {
+            console.error('Error generating PDF:', error);
+            showNotification('Error generating PDF report. Please try again.', 'error');
+
+            // Reset button state on error
+            exportText.textContent = 'Download PDF';
+            exportSpinner.style.display = 'none';
+            downloadBtn.disabled = false;
+        }
+    }
+
+    // ===== EXISTING FUNCTIONALITY =====
+    // Sidebar menu toggle
+    const allSideMenu = document.querySelectorAll('#sidebar .side-menu.top li a');
+    allSideMenu.forEach(item => {
+        const li = item.parentElement;
+        item.addEventListener('click', function () {
+            allSideMenu.forEach(i => {
+                i.parentElement.classList.remove('active');
+            })
+            li.classList.add('active');
+        })
+    });
+
+    // Toggle sidebar
+    const menuBar = document.querySelector('#content nav .bx.bx-menu');
+    const sidebar = document.getElementById('sidebar');
+    menuBar.addEventListener('click', function () {
+        sidebar.classList.toggle('hide');
+    })
+
+    // Search button
+    const searchButton = document.querySelector('#content nav form .form-input button');
+    const searchButtonIcon = document.querySelector('#content nav form .form-input button .bx');
+    const searchForm = document.querySelector('#content nav form');
+
+    searchButton.addEventListener('click', function (e) {
+        if (window.innerWidth < 576) {
+            e.preventDefault();
+            searchForm.classList.toggle('show');
+            if (searchForm.classList.contains('show')) {
+                searchButtonIcon.classList.replace('bx-search', 'bx-x');
+            } else {
+                searchButtonIcon.classList.replace('bx-x', 'bx-search');
+            }
+        }
+    })
+
+    if (window.innerWidth < 768) {
+        sidebar.classList.add('hide');
+    } else if (window.innerWidth > 576) {
+        searchButtonIcon.classList.replace('bx-x', 'bx-search');
+        searchForm.classList.remove('show');
+    }
+
+    window.addEventListener('resize', function () {
+        if (this.innerWidth > 576) {
+            searchButtonIcon.classList.replace('bx-x', 'bx-search');
+            searchForm.classList.remove('show');
+        }
+    })
+
+    // Dark mode toggle
+    const switchMode = document.getElementById('switch-mode');
+    switchMode.addEventListener('change', function () {
+        if (this.checked) {
+            document.body.classList.add('dark');
+        } else {
+            document.body.classList.remove('dark');
+        }
+    })
+
+    // ===== RAW MATERIALS CRUD FUNCTIONALITY =====
+    let editId = null;
+
+    // Get form elements
+    const materialForm = document.getElementById("materialForm");
+    const materialNameInput = document.getElementById("materialName");
+    const materialUnitInput = document.getElementById("materialUnit");
+    const materialQuantityInput = document.getElementById("materialQuantity");
+    const materialThresholdInput = document.getElementById("materialThreshold");
+
+    // Modal Functions
+    function openModal() {
+        document.getElementById('materialModal').classList.add('show');
+        document.getElementById('modalTitle').textContent = 'Add Material';
+        document.getElementById('btnText').textContent = 'Save Material';
+        editId = null;
+        materialForm.reset();
+    }
+
+    function closeModal() {
+        document.getElementById('materialModal').classList.remove('show');
+        materialForm.reset();
+        editId = null;
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('materialModal');
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
+
+    // Form submission handler
+    materialForm.addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        const data = {
+            name: materialNameInput.value,
+            unit: materialUnitInput.value,
+            currentQuantity: parseFloat(materialQuantityInput.value),
+            minimumThreshold: parseFloat(materialThresholdInput.value)
+        };
+
+        const url = editId ? `${API}/${editId}` : API;
+        const method = editId ? "PUT" : "POST";
+
+        fetch(url, {
+            method: method,
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify(data)
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.json();
+        })
+        .then(() => {
+            closeModal();
+            load();
+            showNotification(editId ? 'Material updated successfully!' : 'Material added successfully!', 'success');
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Error saving material. Please try again.', 'error');
+        });
+    });
+
+    function load(){
+        fetch(API)
+            .then(r => r.json())
+            .then(d => {
+                const table = document.getElementById("table");
+                table.innerHTML = "";
+                let lowStockCount = 0;
+                let goodStockCount = 0;
+
+                // Cache materials for PDF generation
+                materialsCache = d;
+
+                d.forEach(m => {
+                    const isLowStock = m.currentQuantity < m.minimumThreshold;
+                    if (isLowStock) {
+                        lowStockCount++;
+                    } else {
+                        goodStockCount++;
+                    }
+
+                    table.innerHTML += `
+                    <tr>
+                        <td>${m.id}</td>
+                        <td><strong>${m.name}</strong></td>
+                        <td>${m.unit}</td>
+                        <td class="${isLowStock ? 'low' : ''}">
+                            ${m.currentQuantity} ${m.unit}
+                        </td>
+                        <td>${m.minimumThreshold} ${m.unit}</td>
+                        <td>
+                            <span class="${isLowStock ? 'low' : ''}" style="font-weight: bold;">
+                                ${isLowStock ? 'LOW STOCK' : 'GOOD'}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn-edit" onclick="edit(${m.id})">
+                                    <i class='bx bx-edit'></i> Edit
+                                </button>
+                                <button class="btn-delete" onclick="del(${m.id})">
+                                    <i class='bx bx-trash'></i> Delete
+                                </button>
+                            </div>
+                        </td>
+                    </tr>`;
+                });
+
+                // Update statistics
+                document.getElementById('totalMaterials').textContent = d.length;
+                document.getElementById('lowStock').textContent = lowStockCount;
+                document.getElementById('goodStock').textContent = goodStockCount;
+            })
+            .catch(error => {
+                console.error('Error loading materials:', error);
+                showNotification('Error loading materials. Please refresh the page.', 'error');
+            });
+    }
+
+    function edit(id){
+        fetch(`${API}/${id}`)
+            .then(r => r.json())
+            .then(m => {
+                editId = id;
+                materialNameInput.value = m.name;
+                materialUnitInput.value = m.unit;
+                materialQuantityInput.value = m.currentQuantity;
+                materialThresholdInput.value = m.minimumThreshold;
+                document.getElementById('modalTitle').textContent = 'Edit Material';
+                document.getElementById('btnText').textContent = 'Update Material';
+                document.getElementById('materialModal').classList.add('show');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Error loading material data.', 'error');
+            });
+    }
+
+    function del(id){
+        if(confirm("Are you sure you want to delete this material?\nThis action cannot be undone.")){
+            fetch(`${API}/${id}`, {method:"DELETE"})
+                .then(response => {
+                    if (!response.ok) throw new Error('Delete failed');
+                    load();
+                    showNotification('Material deleted successfully!', 'success');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('Error deleting material.', 'error');
+                });
+        }
+    }
+
+    // Notification System
+    function showNotification(message, type) {
+        // Remove existing notification if any
+        const existingNotif = document.querySelector('.notification');
+        if (existingNotif) {
+            existingNotif.remove();
+        }
+
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.innerHTML = `
+            <i class='bx ${type === 'success' ? 'bx-check-circle' : 'bx-error-circle'}'></i>
+            <span>${message}</span>
+        `;
+
+        document.body.appendChild(notification);
+
+        // Add CSS for notification
+        if (!document.getElementById('notification-style')) {
+            const style = document.createElement('style');
+            style.id = 'notification-style';
+            style.textContent = `
+                .notification {
+                    position: fixed;
+                    top: 80px;
+                    right: 24px;
+                    padding: 16px 24px;
+                    border-radius: 10px;
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    font-family: var(--poppins);
+                    font-weight: 500;
+                    font-size: 14px;
+                    z-index: 4000;
+                    animation: slideInRight 0.3s ease;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                }
+                .notification.success {
+                    background: var(--light-blue);
+                    color: var(--blue);
+                    border: 1px solid var(--blue);
+                }
+                .notification.error {
+                    background: #ffebee;
+                    color: var(--red);
+                    border: 1px solid var(--red);
+                }
+                .notification i {
+                    font-size: 20px;
+                }
+                @keyframes slideInRight {
+                    from {
+                        transform: translateX(400px);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                }
+                @keyframes slideOutRight {
+                    from {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                    to {
+                        transform: translateX(400px);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Auto remove after 4 seconds
+        setTimeout(() => {
+            notification.style.animation = 'slideOutRight 0.3s ease';
+            setTimeout(() => notification.remove(), 300);
+        }, 4000);
+    }
+
+    // Initialize page
+    function init() {
+        // Display user info
+        currentUser = getCurrentUser();
+        displayUserInfo();
+
+        // Load materials
+        load();
+
+        // Preload logo
+        preloadAndConvertLogo();
+
+        // Setup PDF download button
+        downloadBtn.addEventListener('click', generatePDFReport);
+
+        // Add user profile click event
+        document.getElementById('userProfile').addEventListener('click', function() {
+            const user = getCurrentUser();
+            alert(`User Information:\n\nName: ${user.name}\nEmail: ${user.email}\nRole: ${user.role}`);
+        });
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', init);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1914 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href='https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css' rel='stylesheet'>
+    <!-- jsPDF for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <title>Products Management - OperatorHub</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Poppins:wght@400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        li {
+            list-style: none;
+        }
+
+        :root {
+            --poppins: 'Poppins', sans-serif;
+            --lato: 'Lato', sans-serif;
+            --light: #F9F9F9;
+            --green: #2D4F2B;
+            --light-green: #E8F5E9;
+            --light-green-2: #C6E1C6;
+            --light-green-3: #A3D2A3;
+            --dark-green: #1F3A1E;
+            --grey: #eee;
+            --dark-grey: #AAAAAA;
+            --dark: #342E37;
+            --red: #DB504A;
+            --yellow: #FFCE26;
+            --light-yellow: #FFF2C6;
+            --orange: #FD7238;
+            --light-orange: #FFE0D3;
+            --success: #10b981;
+            --info: #0ea5e9;
+            --warning: #f59e0b;
+            --danger: #dc2626;
+            --primary: #2c3e50;
+            --secondary: #3b82f6;
+            --purple: #8b5cf6;
+        }
+
+        html {
+            overflow-x: hidden;
+        }
+
+        body.dark {
+            --light: #0C0C1E;
+            --grey: #060714;
+            --dark: #FBFBFB;
+            --light-green: #1A2B1A;
+            --light-green-2: #152415;
+        }
+
+        body {
+            background: var(--grey);
+            overflow-x: hidden;
+        }
+
+        /* SIDEBAR */
+        #sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 280px;
+            height: 100%;
+            background: var(--light);
+            z-index: 2000;
+            font-family: var(--lato);
+            transition: .3s ease;
+            overflow-x: hidden;
+            scrollbar-width: none;
+        }
+        #sidebar::-webkit-scrollbar {
+            display: none;
+        }
+        #sidebar.hide {
+            width: 60px;
+        }
+        #sidebar .brand {
+            font-size: 24px;
+            font-weight: 700;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            color: var(--green);
+            position: sticky;
+            top: 0;
+            left: 0;
+            background: var(--light);
+            z-index: 500;
+            padding-bottom: 20px;
+            box-sizing: content-box;
+        }
+        #sidebar .brand .bx {
+            min-width: 60px;
+            display: flex;
+            justify-content: center;
+        }
+        #sidebar .side-menu {
+            width: 100%;
+            margin-top: 48px;
+        }
+        #sidebar .side-menu li {
+            height: 48px;
+            background: transparent;
+            margin-left: 6px;
+            border-radius: 48px 0 0 48px;
+            padding: 4px;
+        }
+        #sidebar .side-menu li.active {
+            background: var(--grey);
+            position: relative;
+        }
+        #sidebar .side-menu li.active::before {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            top: -40px;
+            right: 0;
+            box-shadow: 20px 20px 0 var(--grey);
+            z-index: -1;
+        }
+        #sidebar .side-menu li.active::after {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            bottom: -40px;
+            right: 0;
+            box-shadow: 20px -20px 0 var(--grey);
+            z-index: -1;
+        }
+        #sidebar .side-menu li a {
+            width: 100%;
+            height: 100%;
+            background: var(--light);
+            display: flex;
+            align-items: center;
+            border-radius: 48px;
+            font-size: 16px;
+            color: var(--dark);
+            white-space: nowrap;
+            overflow-x: hidden;
+        }
+        #sidebar .side-menu.top li.active a {
+            color: var(--green);
+        }
+        #sidebar.hide .side-menu li a {
+            width: calc(48px - (4px * 2));
+            transition: width .3s ease;
+        }
+        #sidebar .side-menu li a.logout {
+            color: var(--red);
+        }
+        #sidebar .side-menu.top li a:hover {
+            color: var(--green);
+        }
+        #sidebar .side-menu li a .bx {
+            min-width: calc(60px  - ((4px + 6px) * 2));
+            display: flex;
+            justify-content: center;
+        }
+
+        /* CONTENT */
+        #content {
+            position: relative;
+            width: calc(100% - 280px);
+            left: 280px;
+            transition: .3s ease;
+        }
+        #sidebar.hide ~ #content {
+            width: calc(100% - 60px);
+            left: 60px;
+        }
+
+        /* NAVBAR */
+        #content nav {
+            height: 56px;
+            background: var(--light);
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            grid-gap: 24px;
+            font-family: var(--lato);
+            position: sticky;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+        #content nav::before {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            bottom: -40px;
+            left: 0;
+            border-radius: 50%;
+            box-shadow: -20px -20px 0 var(--light);
+        }
+        #content nav a {
+            color: var(--dark);
+        }
+        #content nav .bx.bx-menu {
+            cursor: pointer;
+            color: var(--dark);
+        }
+        #content nav .nav-link {
+            font-size: 16px;
+            transition: .3s ease;
+        }
+        #content nav .nav-link:hover {
+            color: var(--green);
+        }
+        #content nav form {
+            max-width: 400px;
+            width: 100%;
+            margin-right: auto;
+        }
+        #content nav form .form-input {
+            display: flex;
+            align-items: center;
+            height: 36px;
+        }
+        #content nav form .form-input input {
+            flex-grow: 1;
+            padding: 0 16px;
+            height: 100%;
+            border: none;
+            background: var(--grey);
+            border-radius: 36px 0 0 36px;
+            outline: none;
+            width: 100%;
+            color: var(--dark);
+        }
+        #content nav form .form-input button {
+            width: 36px;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: var(--green);
+            color: var(--light);
+            font-size: 18px;
+            border: none;
+            outline: none;
+            border-radius: 0 36px 36px 0;
+            cursor: pointer;
+        }
+
+        /* User Profile in Navbar */
+        #content nav .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 5px 15px;
+            border-radius: 20px;
+            background: var(--light-green);
+            color: var(--dark);
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        #content nav .user-profile:hover {
+            background: var(--light-green-2);
+        }
+
+        #content nav .user-profile .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--green);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        #content nav .user-profile .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #content nav .user-profile .user-name {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        #content nav .user-profile .user-email {
+            font-size: 11px;
+            color: var(--dark-grey);
+        }
+
+        #content nav .switch-mode {
+            display: block;
+            min-width: 50px;
+            height: 25px;
+            border-radius: 25px;
+            background: var(--grey);
+            cursor: pointer;
+            position: relative;
+        }
+        #content nav .switch-mode::before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            bottom: 2px;
+            width: calc(25px - 4px);
+            background: var(--green);
+            border-radius: 50%;
+            transition: all .3s ease;
+        }
+        #content nav #switch-mode:checked + .switch-mode::before {
+            left: calc(100% - (25px - 4px) - 2px);
+        }
+
+        /* MAIN */
+        #content main {
+            width: 100%;
+            padding: 36px 24px;
+            font-family: var(--poppins);
+            max-height: calc(100vh - 56px);
+            overflow-y: auto;
+        }
+
+        /* Head Title */
+        .head-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .head-title .left h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .head-title .left .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--dark-grey);
+            font-size: 14px;
+        }
+
+        .head-title .left .breadcrumb a {
+            color: var(--green);
+            transition: color 0.3s;
+        }
+
+        .head-title .left .breadcrumb a:hover {
+            color: var(--dark-green);
+        }
+
+        .btn-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, var(--green), var(--dark-green));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-family: var(--poppins);
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(45, 79, 43, 0.2);
+        }
+
+        .btn-download:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(45, 79, 43, 0.3);
+        }
+
+        /* KPI Cards - Agriculture Theme */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .kpi-card {
+            background: var(--light);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            border: 2px solid transparent;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 6px;
+            height: 100%;
+        }
+
+        .kpi-card:nth-child(1) {
+            border-color: rgba(45, 79, 43, 0.2);
+        }
+        .kpi-card:nth-child(1)::before {
+            background: linear-gradient(to bottom, #2D4F2B, #3A6B38);
+        }
+
+        .kpi-card:nth-child(2) {
+            border-color: rgba(102, 204, 102, 0.2);
+        }
+        .kpi-card:nth-child(2)::before {
+            background: linear-gradient(to bottom, #66CC66, #52A352);
+        }
+
+        .kpi-card:nth-child(3) {
+            border-color: rgba(166, 226, 46, 0.2);
+        }
+        .kpi-card:nth-child(3)::before {
+            background: linear-gradient(to bottom, #A6E22E, #8BC34A);
+        }
+
+        .kpi-card:nth-child(4) {
+            border-color: rgba(121, 202, 182, 0.2);
+        }
+        .kpi-card:nth-child(4)::before {
+            background: linear-gradient(to bottom, #79CAB6, #5CB8A8);
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        }
+
+        .kpi-card .kpi-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .kpi-card .kpi-header i {
+            font-size: 24px;
+            padding: 10px;
+            border-radius: 12px;
+        }
+
+        .kpi-card:nth-child(1) .kpi-header i {
+            background: rgba(45, 79, 43, 0.15);
+            color: var(--green);
+        }
+
+        .kpi-card:nth-child(2) .kpi-header i {
+            background: rgba(102, 204, 102, 0.15);
+            color: #66CC66;
+        }
+
+        .kpi-card:nth-child(3) .kpi-header i {
+            background: rgba(166, 226, 46, 0.15);
+            color: #A6E22E;
+        }
+
+        .kpi-card:nth-child(4) .kpi-header i {
+            background: rgba(121, 202, 182, 0.15);
+            color: #79CAB6;
+        }
+
+        .kpi-card .kpi-header span {
+            font-size: 14px;
+            color: var(--dark-grey);
+            font-weight: 500;
+        }
+
+        .kpi-card .kpi-value {
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 10px;
+            font-family: var(--poppins);
+            background: linear-gradient(135deg, var(--green), var(--dark-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .kpi-card .kpi-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: var(--light-green);
+            border-radius: 20px;
+            font-size: 12px;
+            color: var(--dark);
+            font-weight: 600;
+            border: 1px solid rgba(45, 79, 43, 0.2);
+        }
+
+        /* Main Card */
+        .main-card {
+            background: var(--light);
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            overflow: hidden;
+            border: 1px solid rgba(45, 79, 43, 0.1);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 24px 30px;
+            background: var(--light-green);
+            border-bottom: 2px solid var(--green);
+        }
+
+        .card-header h2 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--green);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        /* Toolbar */
+        .toolbar {
+            padding: 20px 30px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+            background: var(--grey);
+            border-bottom: 1px solid rgba(45, 79, 43, 0.1);
+        }
+
+        .toolbar-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--light);
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 2px solid rgba(45, 79, 43, 0.1);
+            transition: all 0.3s;
+        }
+
+        .toolbar-item:hover {
+            border-color: var(--green);
+            box-shadow: 0 2px 8px rgba(45, 79, 43, 0.1);
+        }
+
+        .toolbar-item i {
+            color: var(--green);
+        }
+
+        .toolbar-item input,
+        .toolbar-item select {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--dark);
+            font-family: var(--poppins);
+            font-size: 14px;
+            min-width: 120px;
+        }
+
+        .toolbar-item input::placeholder {
+            color: var(--dark-grey);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 12px;
+            font-family: var(--poppins);
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all .3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--green), var(--dark-green));
+            color: var(--light);
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(45, 79, 43, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--light-green);
+            color: var(--green);
+            border: 2px solid rgba(45, 79, 43, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: var(--light-green-2);
+            transform: translateY(-2px);
+        }
+
+        .btn-export {
+            background: linear-gradient(135deg, var(--secondary), #2563eb);
+            color: var(--light);
+        }
+
+        /* Table */
+        .table-container {
+            overflow-x: auto;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            position: sticky;
+            top: 0;
+            background: var(--light-green);
+            z-index: 10;
+        }
+
+        thead th {
+            text-align: left;
+            padding: 18px 20px;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--green);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            border-bottom: 2px solid var(--green);
+            white-space: nowrap;
+        }
+
+        tbody td {
+            padding: 18px 20px;
+            border-bottom: 1px solid rgba(45, 79, 43, 0.1);
+            color: var(--dark);
+            font-size: 14px;
+            vertical-align: middle;
+        }
+
+        tbody tr {
+            transition: all .2s ease;
+        }
+
+        tbody tr:hover {
+            background: var(--light-green);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .status-ready {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(34, 197, 94, 0.1));
+            color: #10b981;
+            border: 2px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .status-dispatched {
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.2), rgba(14, 165, 233, 0.1));
+            color: #0ea5e9;
+            border: 2px solid rgba(14, 165, 233, 0.3);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all .2s ease;
+            font-size: 18px;
+        }
+
+        .icon-btn.view {
+            background: var(--light-green);
+            color: var(--green);
+        }
+
+        .icon-btn.edit {
+            background: rgba(14, 165, 233, 0.1);
+            color: var(--info);
+        }
+
+        .icon-btn.delete {
+            background: rgba(219, 80, 74, 0.1);
+            color: var(--red);
+        }
+
+        .icon-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-dialog {
+            background: var(--light);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.2);
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 24px 30px;
+            background: var(--light-green);
+            border-bottom: 2px solid var(--green);
+        }
+
+        .modal-header h3 {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--green);
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--green);
+            margin-bottom: 10px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid rgba(45, 79, 43, 0.2);
+            border-radius: 10px;
+            background: var(--light);
+            color: var(--dark);
+            font-family: var(--poppins);
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--green);
+            background: var(--light-green);
+            box-shadow: 0 0 0 3px rgba(45, 79, 43, 0.1);
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            padding: 24px 30px;
+            border-top: 2px solid rgba(45, 79, 43, 0.1);
+            background: var(--grey);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--dark-grey);
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            margin-bottom: 20px;
+            color: var(--light-green-2);
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            background: var(--light);
+            border: 2px solid var(--green);
+            padding: 18px 24px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all .3s ease;
+            z-index: 4000;
+            min-width: 300px;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast i {
+            font-size: 24px;
+        }
+
+        .toast.success {
+            border-color: var(--success);
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+        }
+
+        .toast.error {
+            border-color: var(--danger);
+            background: linear-gradient(135deg, rgba(220, 38, 38, 0.1), rgba(220, 38, 38, 0.05));
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--grey);
+            border-top-color: var(--green);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media screen and (max-width: 768px) {
+            #sidebar {
+                width: 200px;
+            }
+
+            #content {
+                width: calc(100% - 200px);
+                left: 200px;
+            }
+
+            #content nav .nav-link {
+                display: none;
+            }
+
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-actions {
+                width: 100%;
+                margin-top: 15px;
+            }
+
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .toolbar-item {
+                width: 100%;
+            }
+
+            .head-title {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+        @media screen and (max-width: 576px) {
+            #content nav form .form-input input {
+                display: none;
+            }
+
+            #content nav form .form-input button {
+                width: auto;
+                height: auto;
+                background: transparent;
+                color: var(--dark);
+            }
+
+            #content nav form.show .form-input input {
+                display: block;
+                width: 100%;
+            }
+            #content nav form.show .form-input button {
+                width: 36px;
+                height: 100%;
+                border-radius: 0 36px 36px 0;
+                color: var(--light);
+                background: var(--green);
+            }
+
+            #content nav form.show ~ .user-profile,
+            #content nav form.show ~ .switch-mode {
+                display: none;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .icon-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+
+<!-- SIDEBAR -->
+<section id="sidebar">
+    <a href="#" class="brand">
+        <i class='bx bxs-leaf'></i>
+        <span class="text">GreenTrack</span>
+    </a>
+
+    <ul class="side-menu top">
+        <!-- Dashboard -->
+        <li>
+            <a href="admin.html">
+                <i class='bx bxs-dashboard'></i>
+                <span class="text">Dashboard</span>
+            </a>
+        </li>
+
+        <!-- User -->
+        <li>
+            <a href="user.html">
+                <i class='bx bxs-user'></i>
+                <span class="text">Utilisateur</span>
+            </a>
+        </li>
+
+        <!-- Raw Material -->
+        <li>
+            <a href="adraw.html">
+                <i class='bx bx-package'></i>
+                <span class="text">Raw Material</span>
+            </a>
+        </li>
+
+        <!-- Material Intake -->
+        <li>
+            <a href="amintake.html">
+                <i class='bx bx-download'></i>
+                <span class="text">Material Intake</span>
+            </a>
+        </li>
+
+        <!-- Material Consumption -->
+        <li>
+            <a href="amconsump.html">
+                <i class='bx bx-upload'></i>
+                <span class="text">Material Consumption</span>
+            </a>
+        </li>
+
+        <!-- Production Stage -->
+        <li>
+            <a href="apstage.html">
+                <i class='bx bx-git-branch'></i>
+                <span class="text">Production Stage</span>
+            </a>
+        </li>
+
+        <!-- Production Task -->
+        <li>
+            <a href="aprtask.html">
+                <i class='bx bx-task'></i>
+                <span class="text">Production Task</span>
+            </a>
+        </li>
+
+        <!-- Production Batch -->
+        <li>
+            <a href="aprbatch.html">
+                <i class='bx bx-grid-alt'></i>
+                <span class="text">Production Batch</span>
+            </a>
+        </li>
+
+        <!-- Product -->
+        <li class="active">
+            <a href="product.html">
+                <i class='bx bx-cube'></i>
+                <span class="text">Product</span>
+            </a>
+        </li>
+
+        <!-- QC Checkpoint -->
+        <li>
+            <a href="adqccheck.html">
+                <i class='bx bx-check-shield'></i>
+                <span class="text">QC Checkpoint</span>
+            </a>
+        </li>
+
+        <!-- QC Record -->
+        <li>
+            <a href="adqcrecord.html">
+                <i class='bx bx-clipboard'></i>
+                <span class="text">QC Record</span>
+            </a>
+        </li>
+
+        <!-- Audit Log -->
+        <li>
+            <a href="adaudit.html">
+                <i class='bx bx-history'></i>
+                <span class="text">Audit Log</span>
+            </a>
+        </li>
+
+        <!-- Statistics -->
+        <li>
+            <a href="report.html">
+                <i class='bx bxs-bar-chart-alt-2'></i>
+                <span class="text">Statistiques</span>
+            </a>
+        </li>
+    </ul>
+
+    <ul class="side-menu">
+        <li>
+            <a href="index.html" class="logout" id="logout-btn">
+                <i class='bx bxs-log-out-circle'></i>
+                <span class="text">Logout</span>
+            </a>
+        </li>
+    </ul>
+</section>
+<!-- SIDEBAR -->
+
+<!-- CONTENT -->
+<section id="content">
+    <!-- NAVBAR -->
+    <nav>
+        <i class='bx bx-menu'></i>
+        <a href="#" class="nav-link">Gestion des Produits</a>
+        <form action="#">
+            <div class="form-input">
+                <input type="search" placeholder="Rechercher...">
+                <button type="submit" class="search-btn"><i class='bx bx-search'></i></button>
+            </div>
+        </form>
+
+        <!-- User Profile -->
+        <div class="user-profile" id="user-profile">
+            <div class="user-avatar" id="user-avatar">A</div>
+            <div class="user-info">
+                <div class="user-name" id="user-name">Administrateur</div>
+                <div class="user-email" id="user-email">admin@greentrack.com</div>
+            </div>
+        </div>
+
+        <input type="checkbox" id="switch-mode" hidden>
+        <label for="switch-mode" class="switch-mode"></label>
+    </nav>
+    <!-- NAVBAR -->
+
+    <!-- MAIN -->
+    <main>
+        <!-- Page Header -->
+        <div class="head-title">
+            <div class="left">
+                <h1>Gestion des Produits</h1>
+                <div class="breadcrumb">
+                    <a href="admin.html">Dashboard</a>
+                    <i class='bx bx-chevron-right'></i>
+                    <span>Produits</span>
+                </div>
+            </div>
+            <button class="btn-download" id="downloadPdf">
+                <i class='bx bxs-cloud-download'></i>
+                <span class="text">Télécharger PDF</span>
+            </button>
+        </div>
+
+        <!-- KPI Section -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <i class='bx bx-box'></i>
+                    <span>Total Produits</span>
+                </div>
+                <div class="kpi-value" id="kpiTotal">—</div>
+                <div class="kpi-badge">
+                    <i class='bx bx-data'></i>
+                    <span id="kpiSource">Stock Total</span>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <i class='bx bx-check-circle'></i>
+                    <span>PRÊTS</span>
+                </div>
+                <div class="kpi-value" id="kpiReady">—</div>
+                <div class="kpi-badge">
+                    <i class='bx bx-trending-up'></i>
+                    <span>Disponibles</span>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <i class='bx bx-rocket'></i>
+                    <span>EXPÉDIÉS</span>
+                </div>
+                <div class="kpi-value" id="kpiDispatched">—</div>
+                <div class="kpi-badge">
+                    <i class='bx bx-paper-plane'></i>
+                    <span>Livrés</span>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <i class='bx bx-barcode'></i>
+                    <span>Avec Code-barres</span>
+                </div>
+                <div class="kpi-value" id="kpiBarcode">—</div>
+                <div class="kpi-badge">
+                    <i class='bx bx-purchase-tag'></i>
+                    <span>Traçables</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Card -->
+        <div class="main-card">
+            <div class="card-header">
+                <h2>
+                    <i class='bx bx-table'></i>
+                    Liste des Produits
+                </h2>
+                <div class="header-actions">
+                    <button id="btnRefresh" class="btn btn-secondary">
+                        <i class='bx bx-refresh'></i>
+                        Rafraîchir
+                    </button>
+                    <button id="btnAdd" class="btn btn-primary">
+                        <i class='bx bx-plus'></i>
+                        Nouveau Produit
+                    </button>
+                    <button id="btnExport" class="btn btn-export">
+                        <i class='bx bx-export'></i>
+                        Exporter Excel
+                    </button>
+                </div>
+            </div>
+
+            <div class="toolbar">
+                <div class="toolbar-item">
+                    <i class='bx bx-search'></i>
+                    <input id="searchInput" type="text" placeholder="Rechercher par nom…" />
+                </div>
+                <div class="toolbar-item">
+                    <i class='bx bx-filter'></i>
+                    <select id="statusFilter">
+                        <option value="">— Statut (tous) —</option>
+                        <option value="READY">PRÊT</option>
+                        <option value="DISPATCHED">EXPÉDIÉ</option>
+                    </select>
+                </div>
+                <div class="toolbar-item">
+                    <i class='bx bx-qr'></i>
+                    <select id="quickFindType">
+                        <option value="barcode">Code-barres</option>
+                        <option value="qrcode">QR Code</option>
+                    </select>
+                </div>
+                <div class="toolbar-item">
+                    <input id="quickFindInput" type="text" placeholder="Scanner / saisir…" style="width: 150px;" />
+                    <button id="btnQuickFind" class="btn btn-primary" style="padding: 10px 14px;">
+                        <i class='bx bx-search'></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                    <tr>
+                        <th style="width: 80px;">ID</th>
+                        <th>Nom</th>
+                        <th>Code-barres</th>
+                        <th>QR Code</th>
+                        <th style="width: 140px;">Statut</th>
+                        <th style="width: 180px;">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody id="tbody">
+                    <tr>
+                        <td colspan="6" class="empty-state">
+                            <i class='bx bx-package'></i>
+                            <p>Chargement des produits...</p>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+    <!-- MAIN -->
+</section>
+<!-- CONTENT -->
+
+<!-- Modal -->
+<div class="modal" id="modal">
+    <div class="modal-dialog">
+        <div class="modal-header">
+            <h3 id="modalTitle">Nouveau Produit</h3>
+            <button class="icon-btn" id="btnCloseModal">
+                <i class='bx bx-x'></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="formProduct">
+                <input type="hidden" id="productId" />
+                <div class="form-group">
+                    <label for="name">Nom du Produit *</label>
+                    <input id="name" required placeholder="Ex: Boîte de 24 unités" />
+                </div>
+                <div class="form-group">
+                    <label for="barcode">Code-barres</label>
+                    <input id="barcode" placeholder="Ex: 1234567890123" />
+                </div>
+                <div class="form-group">
+                    <label for="qrCode">QR Code</label>
+                    <input id="qrCode" placeholder="Ex: QR-PROD-001" />
+                </div>
+                <div class="form-group">
+                    <label for="status">Statut *</label>
+                    <select id="status" required>
+                        <option value="">— Sélectionner —</option>
+                        <option value="READY">PRÊT</option>
+                        <option value="DISPATCHED">EXPÉDIÉ</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" id="btnCancel">Annuler</button>
+            <button class="btn btn-primary" id="btnSave">
+                <span id="saveTxt">Enregistrer</span>
+                <span id="saveSpin" class="spinner" style="display:none;"></span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="toast" id="toast">
+    <i class='bx bx-check-circle'></i>
+    <span id="toastMsg">Opération réussie</span>
+</div>
+
+<script>
+    // API Configuration
+    const API = 'http://localhost:1010/api/v1/products';
+
+    // Get current user from localStorage
+    const currentUser = JSON.parse(localStorage.getItem('currentUser')) || {
+        firstName: 'Admin',
+        lastName: 'User',
+        email: 'admin@greentrack.com',
+        role: 'ADMIN'
+    };
+
+    // Check if user is logged in
+    if (!currentUser) {
+        window.location.href = 'index.html';
+    }
+
+    // DOM Elements
+    const tbody = document.getElementById('tbody');
+    const statusFilter = document.getElementById('statusFilter');
+    const searchInput = document.getElementById('searchInput');
+    const kpiTotal = document.getElementById('kpiTotal');
+    const kpiReady = document.getElementById('kpiReady');
+    const kpiDispatched = document.getElementById('kpiDispatched');
+    const kpiBarcode = document.getElementById('kpiBarcode');
+
+    const modal = document.getElementById('modal');
+    const modalTitle = document.getElementById('modalTitle');
+    const form = document.getElementById('formProduct');
+    const productId = document.getElementById('productId');
+    const nameEl = document.getElementById('name');
+    const barcodeEl = document.getElementById('barcode');
+    const qrCodeEl = document.getElementById('qrCode');
+    const statusEl = document.getElementById('status');
+    const saveBtn = document.getElementById('btnSave');
+    const saveTxt = document.getElementById('saveTxt');
+    const saveSpin = document.getElementById('saveSpin');
+
+    const quickFindType = document.getElementById('quickFindType');
+    const quickFindInput = document.getElementById('quickFindInput');
+
+    // State
+    let products = [];
+
+    // Initialize Application
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeUserProfile();
+        setupSidebar();
+        setupEventListeners();
+        loadProducts();
+    });
+
+    // User Profile Functions
+    function initializeUserProfile() {
+        // Display user information
+        document.getElementById('user-name').textContent =
+            `${currentUser.firstName || 'Admin'} ${currentUser.lastName || ''}`.trim();
+        document.getElementById('user-email').textContent = currentUser.email || 'admin@greentrack.com';
+
+        // Generate avatar initials
+        const avatar = document.getElementById('user-avatar');
+        const firstName = currentUser.firstName || 'A';
+        const lastName = currentUser.lastName || 'D';
+        avatar.textContent = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+
+        // Logout functionality
+        document.getElementById('logout-btn').addEventListener('click', function(e) {
+            e.preventDefault();
+            if (confirm('Êtes-vous sûr de vouloir vous déconnecter?')) {
+                localStorage.removeItem('currentUser');
+                window.location.href = 'index.html';
+            }
+        });
+    }
+
+    function setupSidebar() {
+        const allSideMenu = document.querySelectorAll('#sidebar .side-menu.top li a');
+        allSideMenu.forEach(item => {
+            const li = item.parentElement;
+            item.addEventListener('click', function () {
+                allSideMenu.forEach(i => {
+                    i.parentElement.classList.remove('active');
+                });
+                li.classList.add('active');
+            });
+        });
+
+        // Toggle sidebar
+        const menuBar = document.querySelector('#content nav .bx.bx-menu');
+        const sidebar = document.getElementById('sidebar');
+        menuBar.addEventListener('click', function () {
+            sidebar.classList.toggle('hide');
+        });
+
+        // Search button functionality
+        const searchButton = document.querySelector('#content nav form .form-input button');
+        const searchButtonIcon = document.querySelector('#content nav form .form-input button .bx');
+        const searchForm = document.querySelector('#content nav form');
+
+        searchButton.addEventListener('click', function (e) {
+            if(window.innerWidth < 576) {
+                e.preventDefault();
+                searchForm.classList.toggle('show');
+                if(searchForm.classList.contains('show')) {
+                    searchButtonIcon.classList.replace('bx-search', 'bx-x');
+                } else {
+                    searchButtonIcon.classList.replace('bx-x', 'bx-search');
+                }
+            }
+        });
+
+        // Dark mode toggle
+        const switchMode = document.getElementById('switch-mode');
+        switchMode.addEventListener('change', function () {
+            if(this.checked) {
+                document.body.classList.add('dark');
+                localStorage.setItem('darkMode', 'true');
+            } else {
+                document.body.classList.remove('dark');
+                localStorage.setItem('darkMode', 'false');
+            }
+        });
+
+        // Load dark mode preference
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark');
+            switchMode.checked = true;
+        }
+
+        // Responsive adjustments
+        if(window.innerWidth < 768) {
+            sidebar.classList.add('hide');
+        } else if(window.innerWidth > 576) {
+            searchButtonIcon.classList.replace('bx-x', 'bx-search');
+            searchForm.classList.remove('show');
+        }
+
+        window.addEventListener('resize', function () {
+            if(this.innerWidth > 576) {
+                searchButtonIcon.classList.replace('bx-x', 'bx-search');
+                searchForm.classList.remove('show');
+            }
+        });
+    }
+
+    function setupEventListeners() {
+        // Button Event Listeners
+        document.getElementById('btnAdd').addEventListener('click', () => openModal());
+        document.getElementById('btnRefresh').addEventListener('click', () => loadProducts());
+        document.getElementById('btnCloseModal').addEventListener('click', closeModal);
+        document.getElementById('btnCancel').addEventListener('click', closeModal);
+        document.getElementById('btnExport').addEventListener('click', exportToExcel);
+        document.getElementById('downloadPdf').addEventListener('click', generatePDF);
+
+        // Quick Find
+        document.getElementById('btnQuickFind').addEventListener('click', async () => {
+            const v = quickFindInput.value.trim();
+            if(!v) return showToast('Saisissez un code à rechercher', false);
+            try {
+                let url = quickFindType.value === 'barcode'
+                    ? `${API}/barcode/${encodeURIComponent(v)}`
+                    : `${API}/qrcode/${encodeURIComponent(v)}`;
+                const res = await fetch(url);
+                if(res.ok) {
+                    const p = await res.json();
+                    openModal('view', p);
+                } else {
+                    showToast('Aucun produit trouvé', false);
+                }
+            } catch(err) {
+                console.error(err);
+                showToast("Erreur de recherche rapide", false);
+            }
+        });
+
+        // Filters and Search
+        statusFilter.addEventListener('change', () => loadProducts());
+        searchInput.addEventListener('input', renderTable);
+
+        // Form Submission
+        saveBtn.addEventListener('click', onSave);
+
+        // Close modal with Escape key
+        window.addEventListener('keydown', (e) => {
+            if(e.key === 'Escape' && modal.classList.contains('show')) closeModal();
+        });
+    }
+
+    // Modal Functions
+    function openModal(mode='add', data=null) {
+        form.reset();
+        productId.value = '';
+        nameEl.disabled = barcodeEl.disabled = qrCodeEl.disabled = statusEl.disabled = false;
+        saveBtn.style.display = 'inline-flex';
+
+        if(mode === 'add') {
+            modalTitle.textContent = 'Nouveau Produit';
+            saveBtn.innerHTML = '<i class="bx bx-save"></i> Enregistrer';
+        } else if(mode === 'edit') {
+            modalTitle.textContent = `Modifier Produit #${data.id}`;
+            fillForm(data);
+            saveBtn.innerHTML = '<i class="bx bx-save"></i> Mettre à jour';
+        } else {
+            modalTitle.textContent = `Détails du Produit #${data.id}`;
+            fillForm(data);
+            nameEl.disabled = barcodeEl.disabled = qrCodeEl.disabled = statusEl.disabled = true;
+            saveBtn.style.display = 'none';
+        }
+        modal.classList.add('show');
+    }
+
+    function closeModal() {
+        modal.classList.remove('show');
+    }
+
+    function fillForm(p) {
+        productId.value = p.id || '';
+        nameEl.value = p.name || '';
+        barcodeEl.value = p.barcode || '';
+        qrCodeEl.value = p.qrCode || '';
+        statusEl.value = p.status || '';
+    }
+
+    // Toast Notification
+    function showToast(msg, success = true) {
+        const toast = document.getElementById('toast');
+        const toastMsg = document.getElementById('toastMsg');
+        const icon = toast.querySelector('i');
+
+        toastMsg.textContent = msg;
+        toast.className = `toast ${success ? 'success' : 'error'}`;
+        icon.className = success ? 'bx bx-check-circle' : 'bx bx-error-circle';
+
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    function setSaving(loading) {
+        saveBtn.disabled = loading;
+        saveTxt.style.display = loading ? 'none' : 'inline';
+        saveSpin.style.display = loading ? 'inline-block' : 'none';
+    }
+
+    // CRUD Operations
+    async function loadProducts() {
+        tbody.innerHTML = `<tr>
+            <td colspan="6" class="empty-state">
+                <div class="spinner"></div>
+                <p>Chargement des produits...</p>
+            </td>
+        </tr>`;
+
+        const status = statusFilter.value;
+
+        try {
+            const url = status ? `${API}/status/${encodeURIComponent(status)}` : API;
+            const res = await fetch(url);
+
+            if(!res.ok) throw new Error('Erreur API');
+
+            const data = await res.json();
+            products = Array.isArray(data) ? data : (data ? [data] : []);
+            renderKpis();
+            renderTable();
+        } catch(err) {
+            console.error(err);
+            tbody.innerHTML = `<tr>
+                <td colspan="6" class="empty-state">
+                    <i class='bx bx-error-circle'></i>
+                    <p>Erreur de chargement. Vérifiez le serveur.</p>
+                </td>
+            </tr>`;
+            showToast('Impossible de charger les produits', false);
+        }
+    }
+
+    function renderKpis() {
+        const total = products.length;
+        const ready = products.filter(p => (p.status || '').toUpperCase() === 'READY').length;
+        const dispatched = products.filter(p => (p.status || '').toUpperCase() === 'DISPATCHED').length;
+        const withBarcode = products.filter(p => (p.barcode || '').trim() !== '').length;
+
+        kpiTotal.textContent = total;
+        kpiReady.textContent = ready;
+        kpiDispatched.textContent = dispatched;
+        kpiBarcode.textContent = withBarcode;
+    }
+
+    function renderTable() {
+        const query = searchInput.value.trim().toLowerCase();
+        const filteredProducts = products.filter(p =>
+            !query || (p.name || '').toLowerCase().includes(query)
+        );
+
+        if(filteredProducts.length === 0) {
+            tbody.innerHTML = `<tr>
+                <td colspan="6" class="empty-state">
+                    <i class='bx bx-search-alt'></i>
+                    <p>Aucun produit trouvé</p>
+                </td>
+            </tr>`;
+            return;
+        }
+
+        const rows = filteredProducts.map(p => {
+            const statusClass = (p.status || '').toUpperCase() === 'READY' ? 'status-ready' : 'status-dispatched';
+            const statusText = (p.status || '').toUpperCase() === 'READY' ? 'PRÊT' : 'EXPÉDIÉ';
+
+            return `
+                <tr>
+                    <td><strong>#${escapeHtml(p.id || '')}</strong></td>
+                    <td>${escapeHtml(p.name || '')}</td>
+                    <td>${escapeHtml(p.barcode || '<span style="color:var(--dark-grey)">—</span>')}</td>
+                    <td>${escapeHtml(p.qrCode || '<span style="color:var(--dark-grey)">—</span>')}</td>
+                    <td>
+                        <span class="status-badge ${statusClass}">
+                            ${statusText}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="icon-btn view" title="Voir détails" onclick="onView(${p.id})">
+                                <i class='bx bx-show'></i>
+                            </button>
+                            <button class="icon-btn edit" title="Modifier" onclick="onEdit(${p.id})">
+                                <i class='bx bx-edit'></i>
+                            </button>
+                            <button class="icon-btn delete" title="Supprimer" onclick="onDelete(${p.id})">
+                                <i class='bx bx-trash'></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+
+        tbody.innerHTML = rows;
+    }
+
+    async function onSave() {
+        if(!form.reportValidity()) return;
+
+        const payload = {
+            name: nameEl.value.trim(),
+            barcode: barcodeEl.value.trim() || null,
+            qrCode: qrCodeEl.value.trim() || null,
+            status: statusEl.value
+        };
+
+        const id = productId.value;
+        const isEdit = !!id;
+
+        try {
+            setSaving(true);
+            const res = await fetch(isEdit ? `${API}/${id}` : API, {
+                method: isEdit ? 'PUT' : 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if(!res.ok) throw new Error('Échec de l\'enregistrement');
+
+            showToast(isEdit ? 'Produit mis à jour avec succès' : 'Produit créé avec succès', true);
+            closeModal();
+            await loadProducts();
+        } catch(err) {
+            console.error(err);
+            showToast('Échec de l\'enregistrement', false);
+        } finally {
+            setSaving(false);
+        }
+    }
+
+    async function onView(id) {
+        try {
+            const res = await fetch(`${API}/${id}`);
+            if(res.ok) {
+                const p = await res.json();
+                openModal('view', p);
+            }
+        } catch(err) {
+            console.error(err);
+            showToast('Erreur de chargement', false);
+        }
+    }
+
+    async function onEdit(id) {
+        try {
+            const res = await fetch(`${API}/${id}`);
+            if(res.ok) {
+                const p = await res.json();
+                openModal('edit', p);
+            }
+        } catch(err) {
+            console.error(err);
+            showToast('Erreur de chargement', false);
+        }
+    }
+
+    async function onDelete(id) {
+        if(!confirm(`Supprimer définitivement le produit #${id} ? Cette action est irréversible.`)) return;
+
+        try {
+            const res = await fetch(`${API}/${id}`, { method: 'DELETE' });
+            if(!res.ok) throw new Error('Échec de la suppression');
+
+            showToast('Produit supprimé avec succès', true);
+            await loadProducts();
+        } catch(err) {
+            console.error(err);
+            showToast('Échec de la suppression', false);
+        }
+    }
+
+    // Export Functions
+    function generatePDF() {
+        if (products.length === 0) {
+            showToast('Aucune donnée à exporter', false);
+            return;
+        }
+
+        try {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Add header with green theme
+            doc.setFillColor(45, 79, 43);
+            doc.rect(0, 0, 210, 30, 'F');
+
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(22);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Rapport des Produits', 105, 20, { align: 'center' });
+
+            // Report info
+            doc.setTextColor(100, 100, 100);
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            const date = new Date().toLocaleDateString('fr-FR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            doc.text(`Généré le : ${date}`, 14, 40);
+            doc.text(`Généré par : ${currentUser.firstName} ${currentUser.lastName}`, 14, 45);
+            doc.text(`Email : ${currentUser.email}`, 14, 50);
+            doc.text(`Total produits : ${products.length}`, 14, 55);
+
+            // Prepare table data
+            const tableData = products.map(p => [
+                p.id || '',
+                p.name || '',
+                p.barcode || '-',
+                p.qrCode || '-',
+                (p.status || '').toUpperCase() === 'READY' ? 'PRÊT' : 'EXPÉDIÉ'
+            ]);
+
+            // Add table
+            doc.autoTable({
+                startY: 65,
+                head: [['ID', 'Nom', 'Code-barres', 'QR Code', 'Statut']],
+                body: tableData,
+                theme: 'grid',
+                headStyles: {
+                    fillColor: [45, 79, 43],
+                    textColor: 255,
+                    fontStyle: 'bold'
+                },
+                alternateRowStyles: { fillColor: [245, 255, 245] },
+                margin: { left: 14, right: 14 }
+            });
+
+            // Add footer
+            const pageCount = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.setFontSize(9);
+                doc.setTextColor(150, 150, 150);
+                doc.text(
+                    `Page ${i} sur ${pageCount}`,
+                    doc.internal.pageSize.width / 2,
+                    doc.internal.pageSize.height - 10,
+                    { align: 'center' }
+                );
+                doc.text(
+                    'GreenTrack - Gestion des Produits',
+                    14,
+                    doc.internal.pageSize.height - 10
+                );
+            }
+
+            // Save PDF
+            const fileName = `rapport_produits_${new Date().toISOString().split('T')[0]}.pdf`;
+            doc.save(fileName);
+
+            showToast('Rapport PDF généré avec succès', true);
+        } catch (error) {
+            console.error('Erreur génération PDF:', error);
+            showToast('Erreur lors de la génération du PDF', false);
+        }
+    }
+
+    function exportToExcel() {
+        if (products.length === 0) {
+            showToast('Aucune donnée à exporter', false);
+            return;
+        }
+
+        try {
+            // Create CSV content
+            const headers = ['ID', 'Nom', 'Code-barres', 'QR Code', 'Statut'];
+            const rows = products.map(p => [
+                p.id || '',
+                p.name || '',
+                p.barcode || '',
+                p.qrCode || '',
+                (p.status || '').toUpperCase() === 'READY' ? 'PRÊT' : 'EXPÉDIÉ'
+            ]);
+
+            const csvContent = [
+                'Rapport des Produits',
+                `Généré le : ${new Date().toLocaleDateString('fr-FR')}`,
+                `Généré par : ${currentUser.firstName} ${currentUser.lastName}`,
+                `Email : ${currentUser.email}`,
+                '',
+                headers.join(';'),
+                ...rows.map(row => row.map(cell => `"${cell}"`).join(';'))
+            ].join('\n');
+
+            // Create blob and download
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+
+            link.setAttribute('href', url);
+            link.setAttribute('download', `produits_export_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            showToast('Export Excel effectué avec succès', true);
+        } catch (error) {
+            console.error('Erreur export Excel:', error);
+            showToast('Erreur lors de l\'export Excel', false);
+        }
+    }
+
+    // Utility Functions
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+</script>
+</body>
+</html>

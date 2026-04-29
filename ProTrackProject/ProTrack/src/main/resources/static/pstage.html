@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>QC Validation - Production Stages</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f7f9fc;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #2c3e50;
+      color: #fff;
+      padding: 1rem;
+      text-align: center;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 2rem auto;
+      padding: 1rem;
+    }
+    .stage {
+      background: #fff;
+      margin-bottom: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    .stage-header {
+      background: #3498db;
+      color: #fff;
+      padding: 1rem;
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+    .checkpoint {
+      padding: 1rem;
+      border-top: 1px solid #eee;
+    }
+    .checkpoint strong {
+      display: block;
+      margin-bottom: 0.3rem;
+      color: #2c3e50;
+    }
+    .checkpoint p {
+      margin: 0.2rem 0;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>QC Validation - Checkpoints by Stage</h1>
+</header>
+<div class="container" id="qcContainer">
+  <p>Loading QC checkpoints...</p>
+</div>
+
+<script>
+  const apiStages = "http://localhost:1010/api/v1/stages";
+
+  async function loadQCCheckpoints() {
+    try {
+      const res = await fetch(apiStages);
+      const stages = await res.json();
+
+      const container = document.getElementById("qcContainer");
+      container.innerHTML = "";
+
+      if (stages.length === 0) {
+        container.innerHTML = "<p>No stages found.</p>";
+        return;
+      }
+
+      // For each stage, fetch its checkpoints
+      for (let stage of stages) {
+        const stageDiv = document.createElement("div");
+        stageDiv.className = "stage";
+
+        const header = document.createElement("div");
+        header.className = "stage-header";
+        header.textContent = `Stage ${stage.stageOrder}: ${stage.name}`;
+        stageDiv.appendChild(header);
+
+        // Fetch checkpoints for this stage
+        const resCheck = await fetch(`http://localhost:1010/api/v1/qc-checkpoints/stage/${stage.id}`);
+        const checkpoints = await resCheck.json();
+
+        if (checkpoints.length === 0) {
+          const noData = document.createElement("div");
+          noData.className = "checkpoint";
+          noData.textContent = "No QC checkpoints for this stage.";
+          stageDiv.appendChild(noData);
+        } else {
+          checkpoints.forEach(cp => {
+            const cpDiv = document.createElement("div");
+            cpDiv.className = "checkpoint";
+            cpDiv.innerHTML = `
+              <strong>${cp.name}</strong>
+              <p><em>Description:</em> ${cp.description || "N/A"}</p>
+              <p><em>Required Checks:</em> ${cp.requiredChecks || "N/A"}</p>
+            `;
+            stageDiv.appendChild(cpDiv);
+          });
+        }
+
+        container.appendChild(stageDiv);
+      }
+    } catch (err) {
+      console.error(err);
+      document.getElementById("qcContainer").innerHTML = "<p>Error loading data.</p>";
+    }
+  }
+
+  loadQCCheckpoints();
+</script>
+</body>
+</html>

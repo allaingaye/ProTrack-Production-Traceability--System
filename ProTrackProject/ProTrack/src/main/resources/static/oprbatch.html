@@ -1,0 +1,1390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Boxicons -->
+    <link href='https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css' rel='stylesheet'>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Poppins:wght@400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        li {
+            list-style: none;
+        }
+
+        :root {
+            --poppins: 'Poppins', sans-serif;
+            --lato: 'Lato', sans-serif;
+            --light: #F9F9F9;
+            --blue: #2D4F2B;
+            --light-blue: #E8F5E9;
+            --grey: #eee;
+            --dark-grey: #AAAAAA;
+            --dark: #342E37;
+            --red: #DB504A;
+            --yellow: #FFCE26;
+            --light-yellow: #FFF2C6;
+            --orange: #FD7238;
+            --light-orange: #FFE0D3;
+        }
+
+        html {
+            overflow-x: hidden;
+        }
+
+        body.dark {
+            --light: #0C0C1E;
+            --grey: #060714;
+            --dark: #FBFBFB;
+        }
+
+        body {
+            background: var(--grey);
+            overflow-x: hidden;
+        }
+
+        /* SIDEBAR */
+        #sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 280px;
+            height: 100%;
+            background: var(--light);
+            z-index: 2000;
+            font-family: var(--lato);
+            transition: .3s ease;
+            overflow-x: hidden;
+            scrollbar-width: none;
+        }
+        #sidebar::--webkit-scrollbar {
+            display: none;
+        }
+        #sidebar.hide {
+            width: 60px;
+        }
+        #sidebar .brand {
+            font-size: 24px;
+            font-weight: 700;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            color: var(--blue);
+            position: sticky;
+            top: 0;
+            left: 0;
+            background: var(--light);
+            z-index: 500;
+            padding-bottom: 20px;
+            box-sizing: content-box;
+        }
+        #sidebar .brand .bx {
+            min-width: 60px;
+            display: flex;
+            justify-content: center;
+        }
+        #sidebar .side-menu {
+            width: 100%;
+            margin-top: 48px;
+        }
+        #sidebar .side-menu li {
+            height: 48px;
+            background: transparent;
+            margin-left: 6px;
+            border-radius: 48px 0 0 48px;
+            padding: 4px;
+        }
+        #sidebar .side-menu li.active {
+            background: var(--grey);
+            position: relative;
+        }
+        #sidebar .side-menu li.active::before {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            top: -40px;
+            right: 0;
+            box-shadow: 20px 20px 0 var(--grey);
+            z-index: -1;
+        }
+        #sidebar .side-menu li.active::after {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            bottom: -40px;
+            right: 0;
+            box-shadow: 20px -20px 0 var(--grey);
+            z-index: -1;
+        }
+        #sidebar .side-menu li a {
+            width: 100%;
+            height: 100%;
+            background: var(--light);
+            display: flex;
+            align-items: center;
+            border-radius: 48px;
+            font-size: 16px;
+            color: var(--dark);
+            white-space: nowrap;
+            overflow-x: hidden;
+        }
+        #sidebar .side-menu.top li.active a {
+            color: var(--blue);
+        }
+        #sidebar.hide .side-menu li a {
+            width: calc(48px - (4px * 2));
+            transition: width .3s ease;
+        }
+        #sidebar .side-menu li a.logout {
+            color: var(--red);
+        }
+        #sidebar .side-menu.top li a:hover {
+            color: var(--blue);
+        }
+        #sidebar .side-menu li a .bx {
+            min-width: calc(60px  - ((4px + 6px) * 2));
+            display: flex;
+            justify-content: center;
+        }
+
+        /* CONTENT */
+        #content {
+            position: relative;
+            width: calc(100% - 280px);
+            left: 280px;
+            transition: .3s ease;
+        }
+        #sidebar.hide ~ #content {
+            width: calc(100% - 60px);
+            left: 60px;
+        }
+
+        /* NAVBAR */
+        #content nav {
+            height: 56px;
+            background: var(--light);
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            grid-gap: 24px;
+            font-family: var(--lato);
+            position: sticky;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+        #content nav::before {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            bottom: -40px;
+            left: 0;
+            border-radius: 50%;
+            box-shadow: -20px -20px 0 var(--light);
+        }
+        #content nav a {
+            color: var(--dark);
+        }
+        #content nav .bx.bx-menu {
+            cursor: pointer;
+            color: var(--dark);
+        }
+        #content nav .nav-link {
+            font-size: 16px;
+            transition: .3s ease;
+        }
+        #content nav .nav-link:hover {
+            color: var(--blue);
+        }
+        #content nav form {
+            max-width: 400px;
+            width: 100%;
+            margin-right: auto;
+        }
+        #content nav form .form-input {
+            display: flex;
+            align-items: center;
+            height: 36px;
+        }
+        #content nav form .form-input input {
+            flex-grow: 1;
+            padding: 0 16px;
+            height: 100%;
+            border: none;
+            background: var(--grey);
+            border-radius: 36px 0 0 36px;
+            outline: none;
+            width: 100%;
+            color: var(--dark);
+        }
+        #content nav form .form-input button {
+            width: 36px;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: var(--blue);
+            color: var(--light);
+            font-size: 18px;
+            border: none;
+            outline: none;
+            border-radius: 0 36px 36px 0;
+            cursor: pointer;
+        }
+        #content nav .switch-mode {
+            display: block;
+            min-width: 50px;
+            height: 25px;
+            border-radius: 25px;
+            background: var(--grey);
+            cursor: pointer;
+            position: relative;
+        }
+        #content nav .switch-mode::before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            bottom: 2px;
+            width: calc(25px - 4px);
+            background: var(--blue);
+            border-radius: 50%;
+            transition: all .3s ease;
+        }
+        #content nav #switch-mode:checked + .switch-mode::before {
+            left: calc(100% - (25px - 4px) - 2px);
+        }
+
+        /* User Profile in Navbar */
+        #content nav .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: auto;
+            padding: 6px 12px;
+            border-radius: 20px;
+            background: var(--grey);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #content nav .user-profile:hover {
+            background: var(--light-blue);
+        }
+
+        #content nav .user-profile .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--blue);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        #content nav .user-profile .user-email {
+            font-size: 14px;
+            color: var(--dark);
+            font-weight: 500;
+        }
+
+        /* MAIN */
+        #content main {
+            width: 100%;
+            padding: 36px 24px;
+            font-family: var(--poppins);
+            max-height: calc(100vh - 56px);
+            overflow-y: auto;
+        }
+        #content main .head-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            grid-gap: 16px;
+            flex-wrap: wrap;
+        }
+        #content main .head-title .left h1 {
+            font-size: 36px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--blue);
+        }
+        #content main .head-title .left .breadcrumb {
+            display: flex;
+            align-items: center;
+            grid-gap: 16px;
+        }
+        #content main .head-title .left .breadcrumb li {
+            color: var(--dark);
+        }
+        #content main .head-title .left .breadcrumb li a {
+            color: var(--dark-grey);
+            pointer-events: none;
+        }
+        #content main .head-title .left .breadcrumb li a.active {
+            color: var(--blue);
+            pointer-events: unset;
+        }
+
+        /* Batch Management Styles */
+        .batch-container {
+            margin-top: 30px;
+        }
+
+        .batch-section {
+            background: var(--light);
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .batch-section h3 {
+            color: var(--blue);
+            font-size: 20px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            font-family: var(--poppins);
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-create {
+            background: var(--blue);
+            color: white;
+        }
+
+        .btn-create:hover {
+            background: #234020;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(45, 79, 43, 0.3);
+        }
+
+        .btn-close {
+            background: var(--red);
+            color: white;
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .btn-close:hover {
+            background: #c0392b;
+        }
+
+        .batch-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .batch-table th,
+        .batch-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--grey);
+        }
+
+        .batch-table th {
+            background: var(--blue);
+            color: white;
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .batch-table tbody tr {
+            transition: background 0.3s ease;
+        }
+
+        .batch-table tbody tr:hover {
+            background: var(--grey);
+        }
+
+        .batch-table input {
+            width: 100%;
+            padding: 6px 10px;
+            border: 1px solid var(--grey);
+            border-radius: 6px;
+            font-family: var(--poppins);
+            font-size: 13px;
+            color: var(--dark);
+            background: transparent;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .batch-table input:focus {
+            border-color: var(--blue);
+            background: var(--light);
+        }
+
+        .batch-table input.error {
+            border-color: var(--red);
+            background: #ffebee;
+        }
+
+        .batch-table td {
+            color: var(--dark);
+            font-size: 14px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-in-progress {
+            background: var(--light-blue);
+            color: var(--blue);
+        }
+
+        .status-qc-pending {
+            background: var(--light-yellow);
+            color: var(--yellow);
+        }
+
+        .status-completed {
+            background: var(--light-green);
+            color: var(--green);
+        }
+
+        /* Modal/Popup */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 3000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: var(--light);
+            margin: auto;
+            padding: 0;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            animation: slideDown 0.3s ease;
+        }
+
+        .modal-header {
+            padding: 24px;
+            background: var(--blue);
+            color: white;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-header h2 {
+            font-size: 22px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .close {
+            color: white;
+            font-size: 32px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .close:hover {
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--dark);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--grey);
+            border-radius: 8px;
+            font-family: var(--poppins);
+            font-size: 14px;
+            color: var(--dark);
+            background: var(--grey);
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input.error {
+            border-color: var(--red);
+            background: #ffebee;
+        }
+
+        .form-group input:focus {
+            border-color: var(--blue);
+            background: var(--light);
+        }
+
+        .error-message {
+            color: var(--red);
+            font-size: 12px;
+            margin-top: 4px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .modal-footer {
+            padding: 20px 30px;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            border-top: 1px solid var(--grey);
+        }
+
+        .btn-save {
+            background: var(--blue);
+            color: white;
+        }
+
+        .btn-save:hover {
+            background: #234020;
+            transform: translateY(-2px);
+        }
+
+        .btn-cancel {
+            background: var(--grey);
+            color: var(--dark);
+        }
+
+        .btn-cancel:hover {
+            background: var(--dark-grey);
+        }
+
+        /* Notification Styles */
+        .notification {
+            position: fixed;
+            top: 80px;
+            right: 24px;
+            padding: 16px 24px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: var(--poppins);
+            font-weight: 500;
+            font-size: 14px;
+            z-index: 4000;
+            animation: slideInRight 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .notification.success {
+            background: var(--light-blue);
+            color: var(--blue);
+            border: 1px solid var(--blue);
+        }
+
+        .notification.error {
+            background: #ffebee;
+            color: var(--red);
+            border: 1px solid var(--red);
+        }
+
+        .notification.info {
+            background: var(--light-yellow);
+            color: var(--yellow);
+            border: 1px solid var(--yellow);
+        }
+
+        .notification i {
+            font-size: 20px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+
+        @media screen and (max-width: 768px) {
+            #sidebar {
+                width: 200px;
+            }
+
+            #content {
+                width: calc(100% - 60px);
+                left: 200px;
+            }
+
+            #content nav .nav-link {
+                display: none;
+            }
+
+            #content nav .user-profile .user-email {
+                display: none;
+            }
+        }
+
+        @media screen and (max-width: 576px) {
+            #content nav form .form-input input {
+                display: none;
+            }
+
+            #content nav form .form-input button {
+                width: auto;
+                height: auto;
+                background: transparent;
+                border-radius: none;
+                color: var(--dark);
+            }
+
+            #content nav form.show .form-input input {
+                display: block;
+                width: 100%;
+            }
+            #content nav form.show .form-input button {
+                width: 36px;
+                height: 100%;
+                border-radius: 0 36px 36px 0;
+                color: var(--light);
+                background: var(--red);
+            }
+
+            .batch-table {
+                font-size: 12px;
+            }
+
+            .batch-table th,
+            .batch-table td {
+                padding: 8px 4px;
+            }
+
+            .modal-content {
+                width: 95%;
+                margin: 10px;
+            }
+        }
+    </style>
+
+    <title>Batch Management - OperatorHub</title>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<section id="sidebar">
+    <a href="#" class="brand">
+        <i class='bx bxs-factory'></i>
+        <span class="text">Operator Hub</span>
+    </a>
+
+    <ul class="side-menu top">
+        <li><a href="operator.html"><i class='bx bxs-dashboard'></i><span class="text">Dashboard</span></a></li>
+        <li><a href="opraw.html"><i class='bx bx-package'></i><span class="text">Raw Material</span></a></li>
+        <li><a href="opmat.html"><i class='bx bx-download'></i><span class="text">Material Intake</span></a></li>
+        <li><a href="opconsum.html"><i class='bx bx-upload'></i><span class="text">Material Consumption</span></a></li>
+        <li><a href="opstage.html"><i class='bx bx-git-branch'></i><span class="text">Production Stage</span></a></li>
+        <li><a href="oprtask.html"><i class='bx bx-task'></i><span class="text">Production Task</span></a></li>
+        <li class="active"><a href="oprbatch.html"><i class='bx bx-grid-alt'></i><span class="text">Production Batch</span></a></li>
+        <li><a href="opproduct.html"><i class='bx bx-cube'></i><span class="text">Product</span></a></li>
+        <li> <a href="opqccheck.html"><i class='bx bx-check-shield'></i><span class="text">QC Checkpoint</span></a></li>
+<!--        <li><a href="opaudit.html"><i class='bx bx-history'></i><span class="text">Audit Log</span></a></li>-->
+        <li><a href="try.html"><i class='bx bxs-bar-chart-alt-2'></i><span class="text">Statistiques</span></a></li>
+    </ul>
+
+    <ul class="side-menu">
+        <li>
+            <a href="login.html" class="logout">
+                <i class='bx bxs-log-out-circle'></i>
+                <span class="text">Logout</span>
+            </a>
+        </li>
+    </ul>
+</section>
+<!-- SIDEBAR -->
+
+<!-- CONTENT -->
+<section id="content">
+    <!-- NAVBAR -->
+    <nav>
+        <i class='bx bx-menu'></i>
+        <a href="#" class="nav-link">Categories</a>
+        <form action="#">
+            <div class="form-input">
+                <input type="search" placeholder="Search...">
+                <button type="submit" class="search-btn"><i class='bx bx-search'></i></button>
+            </div>
+        </form>
+
+        <!-- User Profile Section -->
+        <div class="user-profile" id="userProfile">
+            <div class="user-avatar" id="userAvatar">U</div>
+            <div class="user-email" id="userEmail">user@example.com</div>
+        </div>
+
+        <input type="checkbox" id="switch-mode" hidden>
+        <label for="switch-mode" class="switch-mode"></label>
+    </nav>
+    <!-- NAVBAR -->
+
+    <!-- MAIN -->
+    <main>
+        <div class="head-title">
+            <div class="left">
+                <h1>Batch Management</h1>
+                <ul class="breadcrumb">
+                    <li>
+                        <a href="#">Dashboard</a>
+                    </li>
+                    <li><i class='bx bx-chevron-right'></i></li>
+                    <li>
+                        <a class="active" href="#">Production Batch</a>
+                    </li>
+                </ul>
+            </div>
+            <button class="btn btn-create" onclick="openModal()">
+                <i class='bx bx-plus'></i> Add New Batch
+            </button>
+        </div>
+
+        <div class="batch-container">
+            <!-- In-Progress Batches Table -->
+            <div class="batch-section">
+                <h3><i class='bx bx-list-ul'></i> In-Progress Batches</h3>
+                <div style="overflow-x: auto;">
+                    <table class="batch-table">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Batch Number</th>
+                            <th>Start Date</th>
+                            <th>Quantity</th>
+                            <th>Product Type</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody id="batchTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+    <!-- MAIN -->
+</section>
+<!-- CONTENT -->
+
+<!-- MODAL -->
+<div id="batchModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>
+                <i class='bx bx-plus-circle'></i>
+                <span>Create New Batch</span>
+            </h2>
+            <span class="close" onclick="closeModal()">&times;</span>
+        </div>
+        <form id="createForm">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Batch Number *</label>
+                    <input type="text" id="modalBatchNumber" placeholder="Enter batch number (e.g., BATCH-001)" required>
+                    <div class="error-message" id="batchNumberError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>Start Date *</label>
+                    <input type="date" id="modalStartDate" required>
+                    <div class="error-message" id="startDateError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>Product Quantity *</label>
+                    <input type="number" id="modalQuantity" placeholder="Enter quantity" step="0.01" min="0.01" required>
+                    <div class="error-message" id="quantityError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>Product Type *</label>
+                    <input type="text" id="modalProductType" placeholder="Enter product type" required>
+                    <div class="error-message" id="productTypeError"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-cancel" onclick="closeModal()">
+                    <i class='bx bx-x'></i> Cancel
+                </button>
+                <button type="submit" class="btn btn-save">
+                    <i class='bx bx-save'></i> Create Batch
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // ===== USER MANAGEMENT =====
+    // Get user from localStorage or use default
+    function getCurrentUser() {
+        const savedUser = localStorage.getItem('currentUser');
+        if (savedUser) {
+            return JSON.parse(savedUser);
+        }
+
+        const defaultUser = {
+            id: 1,
+            name: "John Operator",
+            email: "john.operator@factory.com",
+            role: "operator",
+            avatarLetter: "J"
+        };
+
+        localStorage.setItem('currentUser', JSON.stringify(defaultUser));
+        return defaultUser;
+    }
+
+    // Display user information
+    function displayUserInfo() {
+        const user = getCurrentUser();
+        document.getElementById('userEmail').textContent = user.email;
+        document.getElementById('userAvatar').textContent = user.avatarLetter;
+
+        const userProfile = document.getElementById('userProfile');
+        userProfile.title = `${user.name}\n${user.email}\nRole: ${user.role}`;
+    }
+
+    // ===== NOTIFICATION SYSTEM =====
+    function showNotification(message, type = 'info') {
+        const existingNotif = document.querySelector('.notification');
+        if (existingNotif) {
+            existingNotif.remove();
+        }
+
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.innerHTML = `
+            <i class='bx ${type === 'success' ? 'bx-check-circle' : type === 'error' ? 'bx-error-circle' : 'bx-info-circle'}'></i>
+            <span>${message}</span>
+        `;
+
+        document.body.appendChild(notification);
+
+        // Auto remove after 4 seconds
+        setTimeout(() => {
+            notification.style.animation = 'slideOutRight 0.3s ease';
+            setTimeout(() => notification.remove(), 300);
+        }, 4000);
+    }
+
+    // ===== MODAL FUNCTIONS =====
+    function openModal() {
+        document.getElementById('batchModal').classList.add('show');
+        // Set today's date as default
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('modalStartDate').value = today;
+        document.getElementById('modalStartDate').min = today; // Prevent past dates
+        document.getElementById('modalStartDate').max = today; // Prevent future dates
+    }
+
+    function closeModal() {
+        document.getElementById('batchModal').classList.remove('show');
+        document.getElementById('createForm').reset();
+        clearErrors();
+    }
+
+    // Clear all error messages
+    function clearErrors() {
+        document.querySelectorAll('.error-message').forEach(el => {
+            el.classList.remove('show');
+            el.textContent = '';
+        });
+        document.querySelectorAll('.form-group input').forEach(el => {
+            el.classList.remove('error');
+        });
+    }
+
+    // Show error message for a specific field
+    function showError(fieldId, message) {
+        const input = document.getElementById(fieldId);
+        const errorEl = document.getElementById(fieldId + 'Error');
+        input.classList.add('error');
+        errorEl.textContent = message;
+        errorEl.classList.add('show');
+    }
+
+    // Hide error message for a specific field
+    function hideError(fieldId) {
+        const input = document.getElementById(fieldId);
+        const errorEl = document.getElementById(fieldId + 'Error');
+        input.classList.remove('error');
+        errorEl.classList.remove('show');
+    }
+
+    // ===== FORM VALIDATION =====
+    function validateForm() {
+        let isValid = true;
+        clearErrors();
+
+        // Batch Number validation
+        const batchNumber = document.getElementById('modalBatchNumber').value.trim();
+        if (!batchNumber) {
+            showError('modalBatchNumber', 'Batch number is required');
+            isValid = false;
+        } else if (batchNumber.length < 3) {
+            showError('modalBatchNumber', 'Batch number must be at least 3 characters');
+            isValid = false;
+        }
+
+        // Start Date validation
+        const startDate = document.getElementById('modalStartDate').value;
+        const today = new Date().toISOString().split('T')[0];
+        if (!startDate) {
+            showError('modalStartDate', 'Start date is required');
+            isValid = false;
+        } else if (startDate < today) {
+            showError('modalStartDate', 'Cannot select a past date');
+            isValid = false;
+        } else if (startDate > today) {
+            showError('modalStartDate', 'Cannot select a future date');
+            isValid = false;
+        }
+
+        // Quantity validation
+        const quantity = parseFloat(document.getElementById('modalQuantity').value);
+        if (!quantity || isNaN(quantity)) {
+            showError('modalQuantity', 'Quantity is required');
+            isValid = false;
+        } else if (quantity <= 0) {
+            showError('modalQuantity', 'Quantity must be greater than 0');
+            isValid = false;
+        }
+
+        // Product Type validation
+        const productType = document.getElementById('modalProductType').value.trim();
+        if (!productType) {
+            showError('modalProductType', 'Product type is required');
+            isValid = false;
+        } else if (productType.length < 2) {
+            showError('modalProductType', 'Product type must be at least 2 characters');
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    // ===== EXISTING FUNCTIONALITY =====
+    const API_URL = "http://localhost:1010/api/v1/batches";
+
+    // Sidebar menu toggle
+    const allSideMenu = document.querySelectorAll('#sidebar .side-menu.top li a');
+    allSideMenu.forEach(item => {
+        const li = item.parentElement;
+        item.addEventListener('click', function () {
+            allSideMenu.forEach(i => {
+                i.parentElement.classList.remove('active');
+            })
+            li.classList.add('active');
+        })
+    });
+
+    // Toggle sidebar
+    const menuBar = document.querySelector('#content nav .bx.bx-menu');
+    const sidebar = document.getElementById('sidebar');
+    menuBar.addEventListener('click', function () {
+        sidebar.classList.toggle('hide');
+    })
+
+    // Search button
+    const searchButton = document.querySelector('#content nav form .form-input button');
+    const searchButtonIcon = document.querySelector('#content nav form .form-input button .bx');
+    const searchForm = document.querySelector('#content nav form');
+
+    searchButton.addEventListener('click', function (e) {
+        if (window.innerWidth < 576) {
+            e.preventDefault();
+            searchForm.classList.toggle('show');
+            if (searchForm.classList.contains('show')) {
+                searchButtonIcon.classList.replace('bx-search', 'bx-x');
+            } else {
+                searchButtonIcon.classList.replace('bx-x', 'bx-search');
+            }
+        }
+    })
+
+    if (window.innerWidth < 768) {
+        sidebar.classList.add('hide');
+    } else if (window.innerWidth > 576) {
+        searchButtonIcon.classList.replace('bx-x', 'bx-search');
+        searchForm.classList.remove('show');
+    }
+
+    window.addEventListener('resize', function () {
+        if (this.innerWidth > 576) {
+            searchButtonIcon.classList.replace('bx-x', 'bx-search');
+            searchForm.classList.remove('show');
+        }
+    })
+
+    // Dark mode toggle
+    const switchMode = document.getElementById('switch-mode');
+    switchMode.addEventListener('change', function () {
+        if (this.checked) {
+            document.body.classList.add('dark');
+        } else {
+            document.body.classList.remove('dark');
+        }
+    })
+
+    // ===== BATCH MANAGEMENT FUNCTIONALITY =====
+
+    // Load IN_PROGRESS batches
+    async function loadBatches() {
+        try {
+            const tbody = document.getElementById("batchTable");
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 40px;">
+                        <i class='bx bx-loader-alt bx-spin' style="font-size: 32px; color: var(--blue);"></i><br>
+                        <span style="color: var(--dark-grey); margin-top: 10px; display: inline-block;">Loading batches...</span>
+                    </td>
+                </tr>
+            `;
+
+            const res = await fetch(`${API_URL}/status/COMPLETED`);
+            if (!res.ok) throw new Error('Failed to fetch batches');
+
+            const batches = await res.json();
+
+            if (batches.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 40px; color: var(--dark-grey);">
+                            <i class='bx bx-package' style="font-size: 32px;"></i><br>
+                            No batches in progress
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = "";
+            batches.forEach(b => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${b.id}</td>
+                        <td><input type="text" value="${b.batchNumber || ''}" onchange="updateField(${b.id}, 'batchNumber', this.value)"></td>
+                        <td><input type="date" value="${b.startDate || ''}" onchange="updateField(${b.id}, 'startDate', this.value)" class="date-input"></td>
+                        <td><input type="number" value="${b.productQuantity || ''}" step="0.01" onchange="updateField(${b.id}, 'productQuantity', this.value)"></td>
+                        <td><input type="text" value="${b.productType || ''}" onchange="updateField(${b.id}, 'productType', this.value)"></td>
+                        <td><span class="status-badge status_completed">${b.status || 'completed'}</span></td>
+                        <td>
+                            <button class="btn btn-close" onclick="closeBatch(${b.id})">
+                                <i class='bx bx-check'></i> Close
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            // Add date validation to date inputs in table
+            document.querySelectorAll('.date-input').forEach(input => {
+                const today = new Date().toISOString().split('T')[0];
+                input.min = today;
+                input.max = today;
+
+                input.addEventListener('change', function() {
+                    validateTableDate(this);
+                });
+            });
+
+        } catch (error) {
+            console.error('Error loading batches:', error);
+            const tbody = document.getElementById("batchTable");
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 40px; color: var(--red);">
+                        <i class='bx bx-error' style="font-size: 32px;"></i><br>
+                        Error loading batches. Please check your API connection.
+                    </td>
+                </tr>
+            `;
+            showNotification('Error loading batches: ' + error.message, 'error');
+        }
+    }
+
+    // Validate date in table
+    function validateTableDate(input) {
+        const today = new Date().toISOString().split('T')[0];
+        if (input.value < today) {
+            showNotification('Cannot select a past date', 'error');
+            input.value = today;
+        } else if (input.value > today) {
+            showNotification('Cannot select a future date', 'error');
+            input.value = today;
+        }
+    }
+
+    // Create new batch
+    document.getElementById("createForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        if (!validateForm()) {
+            showNotification('Please fix the errors in the form', 'error');
+            return;
+        }
+
+        const newBatch = {
+            batchNumber: document.getElementById("modalBatchNumber").value.trim(),
+            startDate: document.getElementById("modalStartDate").value,
+            status: "COMPLETED",
+            productQuantity: parseFloat(document.getElementById("modalQuantity").value),
+            productType: document.getElementById("modalProductType").value.trim()
+        };
+
+        try {
+            showNotification('Creating batch...', 'info');
+
+            const response = await fetch(API_URL, {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(newBatch)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to create batch');
+            }
+
+            closeModal();
+            loadBatches();
+            showNotification('Batch created successfully!', 'success');
+
+        } catch (error) {
+            console.error('Error creating batch:', error);
+            showNotification('Error creating batch: ' + error.message, 'error');
+        }
+    });
+
+    // Update field of batch
+    async function updateField(id, field, value) {
+        try {
+            // Validate date field
+            if (field === 'startDate') {
+                const today = new Date().toISOString().split('T')[0];
+                if (value < today) {
+                    showNotification('Cannot set date to the past', 'error');
+                    loadBatches(); // Reload to reset value
+                    return;
+                }
+                if (value > today) {
+                    showNotification('Cannot set date to the future', 'error');
+                    loadBatches(); // Reload to reset value
+                    return;
+                }
+            }
+
+            // Validate quantity field
+            if (field === 'productQuantity') {
+                const quantity = parseFloat(value);
+                if (isNaN(quantity) || quantity <= 0) {
+                    showNotification('Quantity must be a positive number', 'error');
+                    loadBatches(); // Reload to reset value
+                    return;
+                }
+            }
+
+            const res = await fetch(`${API_URL}/${id}`);
+            if (!res.ok) throw new Error('Failed to fetch batch');
+
+            const batch = await res.json();
+            batch[field] = field === 'productQuantity' ? parseFloat(value) : value;
+
+            const updateRes = await fetch(`${API_URL}/${id}`, {
+                method: "PUT",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(batch)
+            });
+
+            if (!updateRes.ok) throw new Error('Failed to update batch');
+
+            showNotification(`Batch ${field} updated`, 'success');
+
+        } catch (error) {
+            console.error('Error updating batch:', error);
+            showNotification('Error updating batch: ' + error.message, 'error');
+            loadBatches(); // Reload to reset any invalid changes
+        }
+    }
+
+    // Close batch → QC_PENDING
+    async function closeBatch(id) {
+        if (!confirm('Are you sure you want to close this batch and move it to QC Pending?')) {
+            return;
+        }
+
+        try {
+            showNotification('Closing batch...', 'info');
+
+            const res = await fetch(`${API_URL}/${id}`);
+            if (!res.ok) throw new Error('Failed to fetch batch');
+
+            const batch = await res.json();
+            batch.status = "QC_PENDING";
+            batch.endDate = new Date().toISOString().split("T")[0];
+
+            const updateRes = await fetch(`${API_URL}/${id}`, {
+                method: "PUT",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(batch)
+            });
+
+            if (!updateRes.ok) throw new Error('Failed to update batch');
+
+            loadBatches();
+            showNotification('Batch closed and moved to QC Pending', 'success');
+
+        } catch (error) {
+            console.error('Error closing batch:', error);
+            showNotification('Error closing batch: ' + error.message, 'error');
+        }
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('batchModal');
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
+
+    // ===== INITIALIZE PAGE =====
+    function init() {
+        displayUserInfo();
+        loadBatches();
+
+        // Add user profile click event
+        document.getElementById('userProfile').addEventListener('click', function() {
+            const user = getCurrentUser();
+            alert(`User Information:\n\nName: ${user.name}\nEmail: ${user.email}\nRole: ${user.role}`);
+        });
+
+        // Real-time validation for form fields
+        document.getElementById('modalBatchNumber').addEventListener('input', function() {
+            hideError('modalBatchNumber');
+        });
+
+        document.getElementById('modalStartDate').addEventListener('change', function() {
+            hideError('modalStartDate');
+        });
+
+        document.getElementById('modalQuantity').addEventListener('input', function() {
+            hideError('modalQuantity');
+        });
+
+        document.getElementById('modalProductType').addEventListener('input', function() {
+            hideError('modalProductType');
+        });
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

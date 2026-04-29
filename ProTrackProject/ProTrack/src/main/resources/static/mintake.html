@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Material Intake</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #34495e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            text-align: center;
+            font-size: 2.2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        input, select, button, textarea {
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            width: 100%;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        button {
+            background-color: var(--success);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+            color: #777;
+        }
+
+        .material-details {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .material-details p {
+            margin-bottom: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div class="container">
+        <h1>Record Material Intake</h1>
+    </div>
+</header>
+
+<div class="container">
+    <div id="alertBox" class="alert"></div>
+
+    <div class="card">
+        <h2>New Material Receipt</h2>
+        <p>Use this form to record materials received from suppliers</p>
+
+        <form id="intakeForm">
+            <div class="form-group">
+                <label for="rawMaterial">Select Material *</label>
+                <select id="rawMaterial" required>
+                    <option value="">-- Select Material --</option>
+                    <!-- Options will be populated dynamically -->
+                </select>
+            </div>
+
+            <div id="materialDetails" class="material-details">
+                <p><strong>Current Stock:</strong> <span id="currentStock">0</span></p>
+                <p><strong>Minimum Threshold:</strong> <span id="minThreshold">0</span></p>
+                <p><strong>Unit:</strong> <span id="materialUnit">-</span></p>
+            </div>
+
+            <div class="form-group">
+                <label for="quantity">Quantity Received *</label>
+                <input type="number" id="quantity" step="0.01" min="0.01" required>
+            </div>
+
+            <div class="form-group">
+                <label for="supplier">Supplier *</label>
+                <input type="text" id="supplier" required>
+            </div>
+
+            <div class="form-group">
+                <label for="dateReceived">Date Received *</label>
+                <input type="date" id="dateReceived" required>
+            </div>
+
+            <div class="form-group">
+                <label for="batchNumber">Batch Number</label>
+                <input type="text" id="batchNumber">
+            </div>
+
+            <div class="form-group">
+                <label for="notes">Notes (optional)</label>
+                <textarea id="notes"></textarea>
+            </div>
+
+            <button type="submit" id="submitBtn">Record Intake</button>
+        </form>
+    </div>
+
+    <div id="loadingIndicator" class="loading">Loading materials...</div>
+</div>
+
+<script>
+    // API base URLs
+    const INTAKE_API_URL = 'http://localhost:1010/api/v1/material-intakes';
+    const MATERIALS_API_URL = 'http://localhost:1010/api/v1/raw-materials';
+
+    // DOM elements
+    const intakeForm = document.getElementById('intakeForm');
+    const rawMaterialSelect = document.getElementById('rawMaterial');
+    const alertBox = document.getElementById('alertBox');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const materialDetails = document.getElementById('materialDetails');
+    const currentStock = document.getElementById('currentStock');
+    const minThreshold = document.getElementById('minThreshold');
+    const materialUnit = document.getElementById('materialUnit');
+
+    // State variables
+    let materials = [];
+
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', initializeApp);
+    intakeForm.addEventListener('submit', submitIntakeForm);
+    rawMaterialSelect.addEventListener('change', updateMaterialDetails);
+
+    // Initialize the application
+    function initializeApp() {
+        // Set today's date as default
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('dateReceived').value = today;
+
+        loadMaterials();
+    }
+
+    // Function to load all materials
+    async function loadMaterials() {
+        try {
+            showLoading();
+            const response = await fetch(MATERIALS_API_URL);
+
+            if (!response.ok) {
+                throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+            }
+
+            materials = await response.json();
+            populateMaterialOptions(materials);
+            hideLoading();
+        } catch (error) {
+            hideLoading();
+            showAlert('Error loading materials: ' + error.message, 'error');
+            console.error('Error:', error);
+        }
+    }
+
+    // Populate material dropdown
+    function populateMaterialOptions(materials) {
+        rawMaterialSelect.innerHTML = '<option value="">-- Select Material --</option>';
+
+        materials.forEach(material => {
+            const option = document.createElement('option');
+            option.value = material.id;
+            option.textContent = `${material.name} (${material.unit})`;
+            option.setAttribute('data-stock', material.currentQuantity);
+            option.setAttribute('data-threshold', material.minimumThreshold);
+            option.setAttribute('data-unit', material.unit);
+            rawMaterialSelect.appendChild(option);
+        });
+    }
+
+    // Update material details when selection changes
+    function updateMaterialDetails() {
+        const selectedOption = rawMaterialSelect.options[rawMaterialSelect.selectedIndex];
+
+        if (selectedOption.value) {
+            currentStock.textContent = selectedOption.getAttribute('data-stock');
+            minThreshold.textContent = selectedOption.getAttribute('data-threshold');
+            materialUnit.textContent = selectedOption.getAttribute('data-unit');
+            materialDetails.style.display = 'block';
+        } else {
+            materialDetails.style.display = 'none';
+        }
+    }
+
+    // Submit intake form
+    async function submitIntakeForm(e) {
+        e.preventDefault();
+
+        const formData = {
+            rawMaterial: { id: parseInt(rawMaterialSelect.value) },
+            quantity: parseFloat(document.getElementById('quantity').value),
+            supplier: document.getElementById('supplier').value,
+            dateReceived: document.getElementById('dateReceived').value,
+            batchNumber: document.getElementById('batchNumber').value,
+            notes: document.getElementById('notes').value
+        };
+
+        try {
+            const response = await fetch(INTAKE_API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || 'Failed to create intake record');
+            }
+
+            const result = await response.json();
+            showAlert('Material intake recorded successfully!', 'success');
+            intakeForm.reset();
+
+            // Set today's date again after reset
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('dateReceived').value = today;
+
+            // Refresh materials to get updated quantities
+            loadMaterials();
+
+        } catch (error) {
+            showAlert('Error recording intake: ' + error.message, 'error');
+            console.error('Error:', error);
+        }
+    }
+
+    // Function to show alert messages
+    function showAlert(message, type) {
+        alertBox.textContent = message;
+        alertBox.className = `alert alert-${type}`;
+        alertBox.style.display = 'block';
+
+        setTimeout(() => {
+            alertBox.style.display = 'none';
+        }, 3000);
+    }
+
+    // Show loading state
+    function showLoading() {
+        loadingIndicator.style.display = 'block';
+        intakeForm.style.display = 'none';
+    }
+
+    // Hide loading state
+    function hideLoading() {
+        loadingIndicator.style.display = 'none';
+        intakeForm.style.display = 'block';
+    }
+</script>
+</body>
+</html>

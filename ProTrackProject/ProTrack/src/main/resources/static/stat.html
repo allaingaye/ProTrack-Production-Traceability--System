@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProTrack - Raw Material Inventory</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #7209b7;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #f8961e;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+            --border-radius: 10px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            background-color: #f5f7fb;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header Styles */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo i {
+            font-size: 2.5rem;
+            color: var(--primary);
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            color: var(--dark);
+        }
+
+        .logo span {
+            color: var(--primary);
+        }
+
+        .server-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 15px;
+            background-color: var(--light);
+            border-radius: var(--border-radius);
+            font-size: 0.9rem;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #4CAF50;
+        }
+
+        .status-indicator.offline {
+            background-color: var(--danger);
+        }
+
+        /* Dashboard Summary */
+        .dashboard-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--box-shadow);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .summary-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .summary-icon.total {
+            background-color: var(--primary);
+        }
+
+        .summary-icon.low-stock {
+            background-color: var(--danger);
+        }
+
+        .summary-icon.threshold {
+            background-color: var(--warning);
+        }
+
+        .summary-icon.healthy {
+            background-color: var(--success);
+        }
+
+        .summary-content h3 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .summary-content p {
+            color: var(--gray);
+            font-size: 0.95rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 30px;
+        }
+
+        @media (max-width: 1100px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Materials Table */
+        .materials-section {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--box-shadow);
+            margin-bottom: 30px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .section-header h2 {
+            font-size: 1.5rem;
+            color: var(--dark);
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background-color: var(--light-gray);
+            color: var(--dark);
+        }
+
+        .btn-secondary:hover {
+            background-color: #dde0e5;
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #e11570;
+        }
+
+        .search-filter {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            gap: 15px;
+        }
+
+        .search-box {
+            flex: 1;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 15px 12px 45px;
+            border: 1px solid var(--light-gray);
+            border-radius: 8px;
+            font-size: 1rem;
+            background-color: #fafbfc;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+        }
+
+        .filter-dropdown select {
+            padding: 12px 15px;
+            border: 1px solid var(--light-gray);
+            border-radius: 8px;
+            font-size: 1rem;
+            background-color: #fafbfc;
+            min-width: 200px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background-color: #f8f9fa;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--dark);
+            border-bottom: 2px solid var(--light-gray);
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .material-name {
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .material-description {
+            font-size: 0.9rem;
+            color: var(--gray);
+            margin-top: 5px;
+        }
+
+        .quantity-indicator {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .quantity-indicator.low {
+            background-color: rgba(248, 37, 133, 0.15);
+            color: var(--danger);
+        }
+
+        .quantity-indicator.medium {
+            background-color: rgba(248, 150, 30, 0.15);
+            color: var(--warning);
+        }
+
+        .quantity-indicator.good {
+            background-color: rgba(76, 201, 240, 0.15);
+            color: var(--success);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--light-gray);
+            color: var(--dark);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            background-color: #dde0e5;
+        }
+
+        .action-btn.edit {
+            color: var(--primary);
+        }
+
+        .action-btn.delete {
+            color: var(--danger);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        /* Alerts Panel */
+        .alerts-panel {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--box-shadow);
+        }
+
+        .alerts-panel h3 {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .alerts-panel h3 i {
+            color: var(--danger);
+        }
+
+        .alert-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .alert-item {
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--danger);
+            background-color: rgba(248, 37, 133, 0.08);
+        }
+
+        .alert-item.warning {
+            border-left-color: var(--warning);
+            background-color: rgba(248, 150, 30, 0.08);
+        }
+
+        .alert-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .alert-material {
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .alert-quantity {
+            font-weight: 600;
+            color: var(--danger);
+        }
+
+        .alert-quantity.warning {
+            color: var(--warning);
+        }
+
+        .alert-message {
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
+        /* Purchase Planning */
+        .purchase-panel {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--box-shadow);
+        }
+
+        .purchase-panel h3 {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .purchase-panel h3 i {
+            color: var(--primary);
+        }
+
+        .purchase-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .purchase-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: rgba(67, 97, 238, 0.08);
+            border-left: 4px solid var(--primary);
+        }
+
+        .purchase-info h4 {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .purchase-quantity {
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
+        .purchase-btn {
+            padding: 8px 15px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .purchase-btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            padding: 25px;
+            border-bottom: 1px solid var(--light-gray);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 1.5rem;
+            color: var(--dark);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--gray);
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--light-gray);
+            border-radius: 8px;
+            font-size: 1rem;
+            background-color: #fafbfc;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .modal-footer {
+            padding: 20px 25px;
+            border-top: 1px solid var(--light-gray);
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 50px;
+            color: var(--gray);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--light-gray);
+        }
+
+        /* Loading State */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 50px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(67, 97, 238, 0.2);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: var(--gray);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: var(--light-gray);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .search-filter {
+                flex-direction: column;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Header -->
+    <header>
+        <div class="logo">
+            <i class="fas fa-boxes"></i>
+            <h1>Pro<span>Track</span> - Raw Material Inventory</h1>
+        </div>
+        <div class="server-status">
+            <div class="status-indicator" id="statusIndicator"></div>
+            <span id="serverStatus">Checking server connection...</span>
+        </div>
+    </header>
+
+    <!-- Dashboard Summary -->
+    <div class="dashboard-summary">
+        <div class="summary-card">
+            <div class="summary-icon total">
+                <i class="fas fa-box-open"></i>
+            </div>
+            <div class="summary-content">
+                <h3 id="totalMaterials">0</h3>
+                <p>Total Raw Materials</p>
+            </div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-icon low-stock">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="summary-content">
+                <h3 id="lowStockCount">0</h3>
+                <p>Low Stock Items</p>
+            </div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-icon threshold">
+                <i class="fas fa-tachometer-alt"></i>
+            </div>
+            <div class="summary-content">
+                <h3 id="nearThresholdCount">0</h3>
+                <p>Near Minimum Threshold</p>
+            </div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-icon healthy">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="summary-content">
+                <h3 id="healthyStockCount">0</h3>
+                <p>Healthy Stock Items</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Materials Table Section -->
+        <div class="materials-section">
+            <div class="section-header">
+                <h2>Raw Material Inventory</h2>
+                <div class="actions">
+                    <button class="btn btn-secondary" id="refreshBtn">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button class="btn btn-primary" id="addMaterialBtn">
+                        <i class="fas fa-plus"></i> Add Material
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search and Filter -->
+            <div class="search-filter">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Search materials...">
+                </div>
+                <div class="filter-dropdown">
+                    <select id="stockFilter">
+                        <option value="all">All Stock Levels</option>
+                        <option value="low">Low Stock Only</option>
+                        <option value="near">Near Threshold</option>
+                        <option value="healthy">Healthy Stock</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Materials Table -->
+            <div class="table-container">
+                <table id="materialsTable">
+                    <thead>
+                    <tr>
+                        <th>Material Name</th>
+                        <th>Current Quantity</th>
+                        <th>Unit</th>
+                        <th>Minimum Threshold</th>
+                        <th>Stock Status</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody id="materialsTableBody">
+                    <!-- Data will be populated by JavaScript -->
+                    <tr>
+                        <td colspan="6" class="loading">
+                            <div class="spinner"></div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <!-- Low Stock Alerts -->
+            <div class="alerts-panel">
+                <h3><i class="fas fa-exclamation-circle"></i> Low Stock Alerts</h3>
+                <div class="alert-list" id="alertList">
+                    <div class="alert-item">
+                        <div class="alert-header">
+                            <span class="alert-material">Steel Sheets</span>
+                            <span class="alert-quantity">15 units</span>
+                        </div>
+                        <p class="alert-message">Below minimum threshold of 50 units</p>
+                    </div>
+                    <div class="alert-item warning">
+                        <div class="alert-header">
+                            <span class="alert-material">Plastic Pellets</span>
+                            <span class="alert-quantity warning">45 units</span>
+                        </div>
+                        <p class="alert-message">Approaching minimum threshold of 50 units</p>
+                    </div>
+                </div>
+                <div class="empty-state" id="noAlerts" style="display: none;">
+                    <i class="fas fa-check-circle"></i>
+                    <p>No low stock alerts at this time</p>
+                </div>
+            </div>
+
+            <!-- Purchase Planning -->
+            <div class="purchase-panel">
+                <h3><i class="fas fa-shopping-cart"></i> Purchase Planning</h3>
+                <div class="purchase-list" id="purchaseList">
+                    <div class="purchase-item">
+                        <div class="purchase-info">
+                            <h4>Steel Sheets</h4>
+                            <p class="purchase-quantity">Recommended: 100 units</p>
+                        </div>
+                        <button class="purchase-btn">Plan Purchase</button>
+                    </div>
+                    <div class="purchase-item">
+                        <div class="purchase-info">
+                            <h4>Plastic Pellets</h4>
+                            <p class="purchase-quantity">Recommended: 80 units</p>
+                        </div>
+                        <button class="purchase-btn">Plan Purchase</button>
+                    </div>
+                </div>
+                <div class="empty-state" id="noPurchases" style="display: none;">
+                    <i class="fas fa-clipboard-check"></i>
+                    <p>All materials are sufficiently stocked</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>ProTrack Inventory Management System &copy; 2023 | Backend running on localhost:1010</p>
+    </footer>
+</div>
+
+<!-- Add/Edit Material Modal -->
+<div class="modal" id="materialModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modalTitle">Add New Raw Material</h3>
+            <button class="close-modal" id="closeModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="materialForm">
+                <input type="hidden" id="materialId">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="materialName">Material Name *</label>
+                        <input type="text" id="materialName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="materialUnit">Unit *</label>
+                        <select id="materialUnit" required>
+                            <option value="">Select unit</option>
+                            <option value="kg">Kilograms (kg)</option>
+                            <option value="g">Grams (g)</option>
+                            <option value="L">Liters (L)</option>
+                            <option value="mL">Milliliters (mL)</option>
+                            <option value="units">Units</option>
+                            <option value="boxes">Boxes</option>
+                            <option value="bags">Bags</option>
+                            <option value="rolls">Rolls</option>
+                            <option value="sheets">Sheets</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="materialDescription">Description</label>
+                    <textarea id="materialDescription" placeholder="Brief description of the material..."></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="currentQuantity">Current Quantity *</label>
+                        <input type="number" id="currentQuantity" min="0" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="minimumThreshold">Minimum Threshold *</label>
+                        <input type="number" id="minimumThreshold" min="0" step="0.01" required>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" id="cancelBtn">Cancel</button>
+            <button class="btn btn-primary" id="saveMaterialBtn">Save Material</button>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal" id="deleteModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Confirm Deletion</h3>
+            <button class="close-modal" id="closeDeleteModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to delete <strong id="deleteMaterialName"></strong>? This action cannot be undone.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" id="cancelDeleteBtn">Cancel</button>
+            <button class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Configuration
+    const API_BASE_URL = 'http://localhost:1010/api/v1';
+    const RAW_MATERIALS_ENDPOINT = `${API_BASE_URL}/raw-materials`;
+
+    // State variables
+    let rawMaterials = [];
+    let currentMaterialId = null;
+    let isEditing = false;
+    let deleteMaterialId = null;
+
+    // DOM Elements
+    const materialsTableBody = document.getElementById('materialsTableBody');
+    const searchInput = document.getElementById('searchInput');
+    const stockFilter = document.getElementById('stockFilter');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const addMaterialBtn = document.getElementById('addMaterialBtn');
+    const materialModal = document.getElementById('materialModal');
+    const deleteModal = document.getElementById('deleteModal');
+    const closeModal = document.getElementById('closeModal');
+    const closeDeleteModal = document.getElementById('closeDeleteModal');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+    const saveMaterialBtn = document.getElementById('saveMaterialBtn');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+    const materialForm = document.getElementById('materialForm');
+    const modalTitle = document.getElementById('modalTitle');
+    const statusIndicator = document.getElementById('statusIndicator');
+    const serverStatus = document.getElementById('serverStatus');
+
+    // Summary elements
+    const totalMaterialsEl = document.getElementById('totalMaterials');
+    const lowStockCountEl = document.getElementById('lowStockCount');
+    const nearThresholdCountEl = document.getElementById('nearThresholdCount');
+    const healthyStockCountEl = document.getElementById('healthyStockCount');
+
+    // Alert and purchase elements
+    const alertList = document.getElementById('alertList');
+    const purchaseList = document.getElementById('purchaseList');
+    const noAlerts = document.getElementById('noAlerts');
+    const noPurchases = document.getElementById('noPurchases');
+
+    // Initialize the application
+    document.addEventListener('DOMContentLoaded', () => {
+        checkServerConnection();
+        loadRawMaterials();
+        setupEventListeners();
+    });
+
+    // Check server connection
+    async function checkServerConnection() {
+        try {
+            const response = await fetch(RAW_MATERIALS_ENDPOINT);
+            if (response.ok) {
+                statusIndicator.classList.remove('offline');
+                serverStatus.textContent = 'Connected to server';
+            } else {
+                throw new Error('Server not responding properly');
+            }
+        } catch (error) {
+            statusIndicator.classList.add('offline');
+            serverStatus.textContent = 'Server connection failed';
+            console.error('Server connection error:', error);
+        }
+    }
+
+    // Setup event listeners
+    function setupEventListeners() {
+        // Refresh button
+        refreshBtn.addEventListener('click', loadRawMaterials);
+
+        // Add material button
+        addMaterialBtn.addEventListener('click', () => {
+            openMaterialModal(false);
+        });
+
+        // Search input
+        searchInput.addEventListener('input', filterMaterials);
+
+        // Stock filter
+        stockFilter.addEventListener('change', filterMaterials);
+
+        // Modal controls
+        closeModal.addEventListener('click', () => materialModal.classList.remove('active'));
+        cancelBtn.addEventListener('click', () => materialModal.classList.remove('active'));
+        closeDeleteModal.addEventListener('click', () => deleteModal.classList.remove('active'));
+        cancelDeleteBtn.addEventListener('click', () => deleteModal.classList.remove('active'));
+
+        // Save material
+        saveMaterialBtn.addEventListener('click', saveMaterial);
+
+        // Confirm delete
+        confirmDeleteBtn.addEventListener('click', deleteMaterial);
+
+        // Close modals when clicking outside
+        window.addEventListener('click', (event) => {
+            if (event.target === materialModal) {
+                materialModal.classList.remove('active');
+            }
+            if (event.target === deleteModal) {
+                deleteModal.classList.remove('active');
+            }
+        });
+    }
+
+    // Load raw materials from API
+    async function loadRawMaterials() {
+        try {
+            // Show loading state
+            materialsTableBody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="loading">
+                        <div class="spinner"></div>
+                    </td>
+                </tr>
+            `;
+
+            const response = await fetch(RAW_MATERIALS_ENDPOINT);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            rawMaterials = await response.json();
+            renderMaterialsTable(rawMaterials);
+            updateSummary();
+            updateAlertsAndPurchases();
+
+        } catch (error) {
+            console.error('Error loading raw materials:', error);
+            materialsTableBody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Failed to load materials. Please check server connection.</p>
+                        <button class="btn btn-secondary" onclick="loadRawMaterials()">Retry</button>
+                    </td>
+                </tr>
+            `;
+        }
+    }
+
+    // Render materials table
+    function renderMaterialsTable(materials) {
+        if (materials.length === 0) {
+            materialsTableBody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="empty-state">
+                        <i class="fas fa-box-open"></i>
+                        <p>No raw materials found. Add your first material!</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        materialsTableBody.innerHTML = materials.map(material => `
+            <tr data-id="${material.id}">
+                <td>
+                    <div class="material-name">${material.name}</div>
+                    <div class="material-description">${material.description || 'No description'}</div>
+                </td>
+                <td>${material.currentQuantity}</td>
+                <td>${material.unit}</td>
+                <td>${material.minimumThreshold}</td>
+                <td>
+                    ${getStockStatusIndicator(material.currentQuantity, material.minimumThreshold)}
+                </td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="action-btn edit" onclick="editMaterial(${material.id})" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn delete" onclick="confirmDelete(${material.id}, '${material.name}')" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    // Get stock status indicator
+    function getStockStatusIndicator(currentQuantity, threshold) {
+        const ratio = currentQuantity / threshold;
+
+        if (ratio < 0.5) {
+            return `<span class="quantity-indicator low">Critical</span>`;
+        } else if (ratio < 1) {
+            return `<span class="quantity-indicator medium">Low</span>`;
+        } else if (ratio < 1.5) {
+            return `<span class="quantity-indicator medium">Near Threshold</span>`;
+        } else {
+            return `<span class="quantity-indicator good">Good</span>`;
+        }
+    }
+
+    // Filter materials based on search and filter
+    function filterMaterials() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const filterValue = stockFilter.value;
+
+        let filtered = rawMaterials.filter(material => {
+            const matchesSearch = material.name.toLowerCase().includes(searchTerm) ||
+                                 (material.description && material.description.toLowerCase().includes(searchTerm));
+
+            if (!matchesSearch) return false;
+
+            const ratio = material.currentQuantity / material.minimumThreshold;
+
+            switch(filterValue) {
+                case 'low':
+                    return ratio < 0.5;
+                case 'near':
+                    return ratio >= 0.5 && ratio < 1.5;
+                case 'healthy':
+                    return ratio >= 1.5;
+                default:
+                    return true;
+            }
+        });
+
+        renderMaterialsTable(filtered);
+    }
+
+    // Update summary cards
+    function updateSummary() {
+        if (!rawMaterials.length) {
+            totalMaterialsEl.textContent = '0';
+            lowStockCountEl.textContent = '0';
+            nearThresholdCountEl.textContent = '0';
+            healthyStockCountEl.textContent = '0';
+            return;
+        }
+
+        totalMaterialsEl.textContent = rawMaterials.length;
+
+        const lowStock = rawMaterials.filter(m => m.currentQuantity / m.minimumThreshold < 0.5).length;
+        const nearThreshold = rawMaterials.filter(m => {
+            const ratio = m.currentQuantity / m.minimumThreshold;
+            return ratio >= 0.5 && ratio < 1.5;
+        }).length;
+        const healthyStock = rawMaterials.filter(m => m.currentQuantity / m.minimumThreshold >= 1.5).length;
+
+        lowStockCountEl.textContent = lowStock;
+        nearThresholdCountEl.textContent = nearThreshold;
+        healthyStockCountEl.textContent = healthyStock;
+    }
+
+    // Update alerts and purchase planning
+    function updateAlertsAndPurchases() {
+        // Clear current alerts and purchases
+        alertList.innerHTML = '';
+        purchaseList.innerHTML = '';
+
+        // Filter low stock items (below threshold)
+        const lowStockItems = rawMaterials.filter(m => m.currentQuantity < m.minimumThreshold);
+
+        // Filter near threshold items (below 1.5x threshold)
+        const nearThresholdItems = rawMaterials.filter(m => {
+            return m.currentQuantity >= m.minimumThreshold &&
+                   m.currentQuantity < (m.minimumThreshold * 1.5);
+        });
+
+        // Show/hide no alerts message
+        if (lowStockItems.length === 0 && nearThresholdItems.length === 0) {
+            noAlerts.style.display = 'block';
+        } else {
+            noAlerts.style.display = 'none';
+
+            // Add critical alerts (below threshold)
+            lowStockItems.forEach(material => {
+                const alertItem = document.createElement('div');
+                alertItem.className = 'alert-item';
+                alertItem.innerHTML = `
+                    <div class="alert-header">
+                        <span class="alert-material">${material.name}</span>
+                        <span class="alert-quantity">${material.currentQuantity} ${material.unit}</span>
+                    </div>
+                    <p class="alert-message">Below minimum threshold of ${material.minimumThreshold} ${material.unit}</p>
+                `;
+                alertList.appendChild(alertItem);
+            });
+
+            // Add warning alerts (near threshold)
+            nearThresholdItems.forEach(material => {
+                const alertItem = document.createElement('div');
+                alertItem.className = 'alert-item warning';
+                alertItem.innerHTML = `
+                    <div class="alert-header">
+                        <span class="alert-material">${material.name}</span>
+                        <span class="alert-quantity warning">${material.currentQuantity} ${material.unit}</span>
+                    </div>
+                    <p class="alert-message">Approaching minimum threshold of ${material.minimumThreshold} ${material.unit}</p>
+                `;
+                alertList.appendChild(alertItem);
+            });
+        }
+
+        // Generate purchase recommendations
+        const purchaseRecommendations = rawMaterials
+            .filter(m => m.currentQuantity < (m.minimumThreshold * 2))
+            .map(material => {
+                const recommendedQuantity = Math.max(
+                    material.minimumThreshold * 3 - material.currentQuantity,
+                    material.minimumThreshold
+                );
+
+                const purchaseItem = document.createElement('div');
+                purchaseItem.className = 'purchase-item';
+                purchaseItem.innerHTML = `
+                    <div class="purchase-info">
+                        <h4>${material.name}</h4>
+                        <p class="purchase-quantity">Recommended: ${Math.ceil(recommendedQuantity)} ${material.unit}</p>
+                    </div>
+                    <button class="purchase-btn" onclick="planPurchase(${material.id})">Plan Purchase</button>
+                `;
+                return purchaseItem;
+            });
+
+        // Show/hide no purchases message
+        if (purchaseRecommendations.length === 0) {
+            noPurchases.style.display = 'block';
+        } else {
+            noPurchases.style.display = 'none';
+            purchaseRecommendations.forEach(item => {
+                purchaseList.appendChild(item);
+            });
+        }
+    }
+
+    // Plan purchase for a material
+    function planPurchase(materialId) {
+        const material = rawMaterials.find(m => m.id === materialId);
+        if (material) {
+            alert(`Purchase planning for ${material.name}\n\nCurrent stock: ${material.currentQuantity} ${material.unit}\nMinimum threshold: ${material.minimumThreshold} ${material.unit}\n\nRecommended purchase: ${Math.ceil(material.minimumThreshold * 3 - material.currentQuantity)} ${material.unit}`);
+            // In a real application, this would open a purchase order form
+        }
+    }
+
+    // Open material modal for add/edit
+    function openMaterialModal(editing, material = null) {
+        isEditing = editing;
+        materialForm.reset();
+
+        if (editing && material) {
+            modalTitle.textContent = 'Edit Raw Material';
+            document.getElementById('materialId').value = material.id;
+            document.getElementById('materialName').value = material.name;
+            document.getElementById('materialDescription').value = material.description || '';
+            document.getElementById('materialUnit').value = material.unit;
+            document.getElementById('currentQuantity').value = material.currentQuantity;
+            document.getElementById('minimumThreshold').value = material.minimumThreshold;
+            currentMaterialId = material.id;
+        } else {
+            modalTitle.textContent = 'Add New Raw Material';
+            document.getElementById('materialId').value = '';
+            currentMaterialId = null;
+        }
+
+        materialModal.classList.add('active');
+    }
+
+    // Edit material
+    function editMaterial(id) {
+        const material = rawMaterials.find(m => m.id === id);
+        if (material) {
+            openMaterialModal(true, material);
+        }
+    }
+
+    // Confirm delete material
+    function confirmDelete(id, name) {
+        deleteMaterialId = id;
+        document.getElementById('deleteMaterialName').textContent = name;
+        deleteModal.classList.add('active');
+    }
+
+    // Save material (create or update)
+    async function saveMaterial() {
+        // Validate form
+        if (!materialForm.checkValidity()) {
+            materialForm.reportValidity();
+            return;
+        }
+
+        const materialData = {
+            name: document.getElementById('materialName').value,
+            description: document.getElementById('materialDescription').value,
+            unit: document.getElementById('materialUnit').value,
+            currentQuantity: parseFloat(document.getElementById('currentQuantity').value),
+            minimumThreshold: parseFloat(document.getElementById('minimumThreshold').value)
+        };
+
+        try {
+            let response;
+
+            if (isEditing && currentMaterialId) {
+                // Update existing material
+                response = await fetch(`${RAW_MATERIALS_ENDPOINT}/${currentMaterialId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(materialData)
+                });
+            } else {
+                // Create new material
+                response = await fetch(RAW_MATERIALS_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(materialData)
+                });
+            }
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            // Close modal and refresh data
+            materialModal.classList.remove('active');
+            loadRawMaterials();
+
+        } catch (error) {
+            console.error('Error saving material:', error);
+            alert('Failed to save material. Please try again.');
+        }
+    }
+
+    // Delete material
+    async function deleteMaterial() {
+        if (!deleteMaterialId) return;
+
+        try {
+            const response = await fetch(`${RAW_MATERIALS_ENDPOINT}/${deleteMaterialId}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            // Close modal and refresh data
+            deleteModal.classList.remove('active');
+            deleteMaterialId = null;
+            loadRawMaterials();
+
+        } catch (error) {
+            console.error('Error deleting material:', error);
+            alert('Failed to delete material. Please try again.');
+        }
+    }
+</script>
+</body>
+</html>

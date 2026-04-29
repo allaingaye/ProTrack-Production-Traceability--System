@@ -1,0 +1,2435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Boxicons -->
+    <link href='https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css' rel='stylesheet'>
+    <!-- jsPDF and html2canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Poppins:wght@400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        li {
+            list-style: none;
+        }
+
+        :root {
+            --poppins: 'Poppins', sans-serif;
+            --lato: 'Lato', sans-serif;
+            --light: #F9F9F9;
+            --blue: #2D4F2B;
+            --light-blue: #E8F5E9;
+            --grey: #eee;
+            --dark-grey: #AAAAAA;
+            --dark: #342E37;
+            --red: #DB504A;
+            --yellow: #FFCE26;
+            --light-yellow: #FFF2C6;
+            --orange: #FD7238;
+            --light-orange: #FFE0D3;
+            --green: #2D4F2B;
+            --light-green: #E8F5E9;
+            --green-gold: #9C8C3A;
+            --light-green-gold: #FFF8E1;
+            --dark-green: #1E3A28;
+            --light-dark-green: #E8F5E9;
+
+            --rating-excellent: #28a745;
+            --rating-good: #17a2b8;
+            --rating-warning: #ffc107;
+            --rating-danger: #dc3545;
+            --rating-bg-excellent: #d4edda;
+            --rating-bg-good: #d1ecf1;
+            --rating-bg-warning: #fff3cd;
+            --rating-bg-danger: #f8d7da;
+        }
+
+        html {
+            overflow-x: hidden;
+        }
+
+        body.dark {
+            --light: #0C0C1E;
+            --grey: #060714;
+            --dark: #FBFBFB;
+        }
+
+        body {
+            background: var(--grey);
+            overflow-x: hidden;
+        }
+
+        /* SIDEBAR */
+        #sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 280px;
+            height: 100%;
+            background: var(--light);
+            z-index: 2000;
+            font-family: var(--lato);
+            transition: .3s ease;
+            overflow-x: hidden;
+            scrollbar-width: none;
+        }
+        #sidebar::--webkit-scrollbar {
+            display: none;
+        }
+        #sidebar.hide {
+            width: 60px;
+        }
+        #sidebar .brand {
+            font-size: 24px;
+            font-weight: 700;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            color: var(--blue);
+            position: sticky;
+            top: 0;
+            left: 0;
+            background: var(--light);
+            z-index: 500;
+            padding-bottom: 20px;
+            box-sizing: content-box;
+        }
+        #sidebar .brand .bx {
+            min-width: 60px;
+            display: flex;
+            justify-content: center;
+        }
+        #sidebar .side-menu {
+            width: 100%;
+            margin-top: 48px;
+        }
+        #sidebar .side-menu li {
+            height: 48px;
+            background: transparent;
+            margin-left: 6px;
+            border-radius: 48px 0 0 48px;
+            padding: 4px;
+        }
+        #sidebar .side-menu li.active {
+            background: var(--grey);
+            position: relative;
+        }
+        #sidebar .side-menu li.active::before {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            top: -40px;
+            right: 0;
+            box-shadow: 20px 20px 0 var(--grey);
+            z-index: -1;
+        }
+        #sidebar .side-menu li.active::after {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            bottom: -40px;
+            right: 0;
+            box-shadow: 20px -20px 0 var(--grey);
+            z-index: -1;
+        }
+        #sidebar .side-menu li a {
+            width: 100%;
+            height: 100%;
+            background: var(--light);
+            display: flex;
+            align-items: center;
+            border-radius: 48px;
+            font-size: 16px;
+            color: var(--dark);
+            white-space: nowrap;
+            overflow-x: hidden;
+        }
+        #sidebar .side-menu.top li.active a {
+            color: var(--blue);
+        }
+        #sidebar.hide .side-menu li a {
+            width: calc(48px - (4px * 2));
+            transition: width .3s ease;
+        }
+        #sidebar .side-menu li a.logout {
+            color: var(--red);
+        }
+        #sidebar .side-menu.top li a:hover {
+            color: var(--blue);
+        }
+        #sidebar .side-menu li a .bx {
+            min-width: calc(60px  - ((4px + 6px) * 2));
+            display: flex;
+            justify-content: center;
+        }
+
+        /* CONTENT */
+        #content {
+            position: relative;
+            width: calc(100% - 280px);
+            left: 280px;
+            transition: .3s ease;
+        }
+        #sidebar.hide ~ #content {
+            width: calc(100% - 60px);
+            left: 60px;
+        }
+
+        /* NAVBAR */
+        #content nav {
+            height: 56px;
+            background: var(--light);
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            grid-gap: 24px;
+            font-family: var(--lato);
+            position: sticky;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+        #content nav::before {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            bottom: -40px;
+            left: 0;
+            border-radius: 50%;
+            box-shadow: -20px -20px 0 var(--light);
+        }
+        #content nav a {
+            color: var(--dark);
+        }
+        #content nav .bx.bx-menu {
+            cursor: pointer;
+            color: var(--dark);
+        }
+        #content nav .nav-link {
+            font-size: 16px;
+            transition: .3s ease;
+        }
+        #content nav .nav-link:hover {
+            color: var(--blue);
+        }
+        #content nav form {
+            max-width: 400px;
+            width: 100%;
+            margin-right: auto;
+        }
+        #content nav form .form-input {
+            display: flex;
+            align-items: center;
+            height: 36px;
+        }
+        #content nav form .form-input input {
+            flex-grow: 1;
+            padding: 0 16px;
+            height: 100%;
+            border: none;
+            background: var(--grey);
+            border-radius: 36px 0 0 36px;
+            outline: none;
+            width: 100%;
+            color: var(--dark);
+        }
+        #content nav form .form-input button {
+            width: 36px;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: var(--blue);
+            color: var(--light);
+            font-size: 18px;
+            border: none;
+            outline: none;
+            border-radius: 0 36px 36px 0;
+            cursor: pointer;
+        }
+        #content nav .switch-mode {
+            display: block;
+            min-width: 50px;
+            height: 25px;
+            border-radius: 25px;
+            background: var(--grey);
+            cursor: pointer;
+            position: relative;
+        }
+        #content nav .switch-mode::before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            bottom: 2px;
+            width: calc(25px - 4px);
+            background: var(--blue);
+            border-radius: 50%;
+            transition: all .3s ease;
+        }
+        #content nav #switch-mode:checked + .switch-mode::before {
+            left: calc(100% - (25px - 4px) - 2px);
+        }
+
+        /* User Profile in Navbar */
+        #content nav .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: auto;
+            padding: 6px 12px;
+            border-radius: 20px;
+            background: var(--grey);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #content nav .user-profile:hover {
+            background: var(--light-blue);
+        }
+
+        #content nav .user-profile .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--blue);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        #content nav .user-profile .user-email {
+            font-size: 14px;
+            color: var(--dark);
+            font-weight: 500;
+        }
+
+        /* MAIN */
+        #content main {
+            width: 100%;
+            padding: 36px 24px;
+            font-family: var(--poppins);
+            max-height: calc(100vh - 56px);
+            overflow-y: auto;
+        }
+        #content main .head-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            grid-gap: 16px;
+            flex-wrap: wrap;
+        }
+        #content main .head-title .left h1 {
+            font-size: 36px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--blue);
+        }
+        #content main .head-title .left .breadcrumb {
+            display: flex;
+            align-items: center;
+            grid-gap: 16px;
+        }
+        #content main .head-title .left .breadcrumb li {
+            color: var(--dark);
+        }
+        #content main .head-title .left .breadcrumb li a {
+            color: var(--dark-grey);
+            pointer-events: none;
+        }
+        #content main .head-title .left .breadcrumb li a.active {
+            color: var(--blue);
+            pointer-events: unset;
+        }
+
+        /* Download PDF Button */
+        .btn-download {
+            height: 36px;
+            padding: 0 16px;
+            border-radius: 36px;
+            background: var(--blue);
+            color: var(--light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            grid-gap: 10px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            font-family: var(--poppins);
+        }
+
+        .btn-download:hover {
+            background: #234020;
+            transform: translateY(-2px);
+        }
+
+        .btn-download .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Statistics Cards */
+        .box-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            grid-gap: 24px;
+            margin-bottom: 36px;
+        }
+
+        .box-info li {
+            padding: 24px;
+            background: var(--light);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            grid-gap: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            border-left: 5px solid var(--green);
+        }
+
+        .box-info li:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(45, 79, 43, 0.2);
+        }
+
+        .box-info li .bx {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            font-size: 36px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .box-info li:nth-child(1) .bx {
+            background: linear-gradient(135deg, #2D4F2B, #3D6C37);
+            color: white;
+            box-shadow: 0 4px 12px rgba(45, 79, 43, 0.3);
+        }
+
+        .box-info li:nth-child(2) .bx {
+            background: linear-gradient(135deg, #9C8C3A, #B8A952);
+            color: white;
+            box-shadow: 0 4px 12px rgba(156, 140, 58, 0.3);
+        }
+
+        .box-info li:nth-child(3) .bx {
+            background: linear-gradient(135deg, #1E3A28, #2D4F2B);
+            color: white;
+            box-shadow: 0 4px 12px rgba(30, 58, 40, 0.3);
+        }
+
+        .box-info li .text h3 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--green);
+            margin-bottom: 5px;
+        }
+
+        .box-info li:nth-child(2) .text h3 {
+            color: #9C8C3A;
+        }
+
+        .box-info li:nth-child(3) .text h3 {
+            color: #1E3A28;
+        }
+
+        .box-info li .text p {
+            color: var(--dark);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Efficiency Rating Styles */
+        .efficiency-container {
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .efficiency-card {
+            background: var(--light);
+            padding: 16px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .efficiency-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .efficiency-card i {
+            font-size: 28px;
+            padding: 12px;
+            border-radius: 10px;
+        }
+
+        .efficiency-card.excellent i {
+            background: var(--rating-bg-excellent);
+            color: var(--rating-excellent);
+        }
+
+        .efficiency-card.good i {
+            background: var(--rating-bg-good);
+            color: var(--rating-good);
+        }
+
+        .efficiency-card.warning i {
+            background: var(--rating-bg-warning);
+            color: #856404;
+        }
+
+        .efficiency-card.danger i {
+            background: var(--rating-bg-danger);
+            color: var(--rating-danger);
+        }
+
+        .efficiency-card .text h4 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: var(--dark);
+        }
+
+        .efficiency-card .text p {
+            font-size: 12px;
+            color: var(--dark-grey);
+        }
+
+        .rating-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .rating-badge i {
+            font-size: 12px;
+        }
+
+        .rating-EXCELLENT {
+            background: var(--rating-bg-excellent);
+            color: var(--rating-excellent);
+            border: 1px solid var(--rating-excellent);
+        }
+
+        .rating-GOOD {
+            background: var(--rating-bg-good);
+            color: var(--rating-good);
+            border: 1px solid var(--rating-good);
+        }
+
+        .rating-WARNING {
+            background: var(--rating-bg-warning);
+            color: #856404;
+            border: 1px solid #ffc107;
+        }
+
+        .rating-OVERDUE {
+            background: var(--rating-bg-danger);
+            color: var(--rating-danger);
+            border: 1px solid var(--rating-danger);
+        }
+
+        .duration-info {
+            font-size: 11px;
+            color: var(--dark-grey);
+            margin-top: 2px;
+        }
+
+        /* Task Execution Styles */
+        .task-container {
+            margin-top: 30px;
+        }
+
+        .task-section {
+            background: var(--light);
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .task-section h3 {
+            color: var(--blue);
+            font-size: 20px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filters {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filters input,
+        .filters select {
+            padding: 12px 16px;
+            border: 1px solid var(--grey);
+            border-radius: 8px;
+            font-family: var(--poppins);
+            font-size: 14px;
+            color: var(--dark);
+            background: var(--grey);
+            outline: none;
+            transition: all 0.3s ease;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .filters input:focus,
+        .filters select:focus {
+            border-color: var(--blue);
+            background: var(--light);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            font-family: var(--poppins);
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-load {
+            background: var(--blue);
+            color: white;
+        }
+
+        .btn-load:hover {
+            background: #234020;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(45, 79, 43, 0.3);
+        }
+
+        .btn-start {
+            background: var(--blue);
+            color: white;
+            padding: 6px 12px;
+            font-size: 11px;
+            border-radius: 4px;
+        }
+
+        .btn-start:hover {
+            background: #234020;
+        }
+
+        .btn-complete {
+            background: var(--orange);
+            color: white;
+            padding: 6px 12px;
+            font-size: 11px;
+            border-radius: 4px;
+        }
+
+        .btn-complete:hover {
+            background: #e66527;
+        }
+
+        .btn-edit {
+            background: var(--green-gold);
+            color: white;
+            padding: 6px 12px;
+            font-size: 11px;
+            border-radius: 4px;
+        }
+
+        .btn-edit:hover {
+            background: #7a6e2e;
+        }
+
+        .btn-delete {
+            background: var(--red);
+            color: white;
+            padding: 6px 12px;
+            font-size: 11px;
+            border-radius: 4px;
+        }
+
+        .btn-delete:hover {
+            background: #b13e39;
+        }
+
+        .task-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 13px;
+        }
+
+        .task-table th,
+        .task-table td {
+            padding: 12px 8px;
+            text-align: left;
+            border-bottom: 1px solid var(--grey);
+            vertical-align: middle;
+        }
+
+        .task-table th {
+            background: var(--blue);
+            color: white;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+        }
+
+        .task-table tbody tr {
+            transition: background 0.3s ease;
+        }
+
+        .task-table tbody tr:hover {
+            background: var(--grey);
+        }
+
+        .task-table td {
+            color: var(--dark);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-PENDING {
+            background: var(--light-orange);
+            color: var(--orange);
+        }
+
+        .status-IN_PROGRESS {
+            background: var(--light-yellow);
+            color: var(--yellow);
+        }
+
+        .status-COMPLETED {
+            background: var(--light-blue);
+            color: var(--blue);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--dark-grey);
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 20px;
+            margin-bottom: 8px;
+            color: var(--dark);
+        }
+
+        .empty-state p {
+            font-size: 14px;
+        }
+
+        .error-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--red);
+        }
+
+        .error-state i {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 5000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background-color: var(--light);
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            animation: slideIn 0.3s ease;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--grey);
+        }
+
+        .modal-header h2 {
+            color: var(--blue);
+            font-size: 24px;
+        }
+
+        .close-modal {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--dark-grey);
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close-modal:hover {
+            color: var(--red);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--grey);
+            border-radius: 8px;
+            font-family: var(--poppins);
+            font-size: 14px;
+            color: var(--dark);
+            background: var(--grey);
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--blue);
+            background: var(--light);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid var(--grey);
+        }
+
+        .btn-save {
+            background: var(--blue);
+            color: white;
+        }
+
+        .btn-save:hover {
+            background: #234020;
+        }
+
+        .btn-cancel {
+            background: var(--grey);
+            color: var(--dark);
+        }
+
+        .btn-cancel:hover {
+            background: var(--dark-grey);
+            color: white;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* PDF container (hidden) */
+        #pdf-container {
+            position: fixed;
+            top: -9999px;
+            left: -9999px;
+            width: 794px;
+            padding: 40px;
+            background: white;
+            font-family: "Times New Roman", Times, serif;
+            z-index: 9999;
+        }
+
+        .pdf-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #2D4F2B;
+            position: relative;
+            background: linear-gradient(135deg, #E8F5E9 0%, #ffffff 100%);
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .pdf-logo {
+            height: 80px;
+            margin-bottom: 15px;
+            max-width: 200px;
+            object-fit: contain;
+        }
+
+        .pdf-title {
+            font-size: 28px;
+            color: #2D4F2B;
+            margin-bottom: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .pdf-subtitle {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .pdf-date {
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .pdf-generated-by {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .pdf-operator-info {
+            font-size: 14px;
+            color: #2D4F2B;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .pdf-statistics {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            border: 1px solid #eee;
+        }
+
+        .stat-box {
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-left: 4px solid #2D4F2B;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2D4F2B;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .pdf-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 11px;
+        }
+
+        .pdf-table th {
+            background: #2D4F2B;
+            color: white;
+            padding: 8px;
+            text-align: left;
+            font-weight: bold;
+            border: 1px solid #ddd;
+        }
+
+        .pdf-table td {
+            padding: 6px 8px;
+            border: 1px solid #ddd;
+        }
+
+        .pdf-table tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        .pdf-footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            text-align: center;
+            font-size: 10px;
+            color: #666;
+        }
+
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 100px;
+            color: rgba(45, 79, 43, 0.05);
+            font-weight: bold;
+            pointer-events: none;
+            white-space: nowrap;
+            text-transform: uppercase;
+        }
+
+        /* Notification Styles */
+        .notification {
+            position: fixed;
+            top: 80px;
+            right: 24px;
+            padding: 16px 24px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: var(--poppins);
+            font-weight: 500;
+            font-size: 14px;
+            z-index: 4000;
+            animation: slideInRight 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .notification.success {
+            background: var(--light-blue);
+            color: var(--blue);
+            border: 1px solid var(--blue);
+        }
+
+        .notification.error {
+            background: #ffebee;
+            color: var(--red);
+            border: 1px solid var(--red);
+        }
+
+        .notification i {
+            font-size: 20px;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+
+        @media screen and (max-width: 768px) {
+            #sidebar {
+                width: 200px;
+            }
+
+            #content {
+                width: calc(100% - 60px);
+                left: 200px;
+            }
+
+            #content nav .nav-link {
+                display: none;
+            }
+
+            #content nav .user-profile .user-email {
+                display: none;
+            }
+
+            .filters {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filters input,
+            .filters select,
+            .btn {
+                width: 100%;
+            }
+
+            .box-info {
+                grid-template-columns: 1fr;
+            }
+
+            .efficiency-container {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .pdf-statistics {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media screen and (max-width: 576px) {
+            #content nav form .form-input input {
+                display: none;
+            }
+
+            #content nav form .form-input button {
+                width: auto;
+                height: auto;
+                background: transparent;
+                border-radius: none;
+                color: var(--dark);
+            }
+
+            #content nav form.show .form-input input {
+                display: block;
+                width: 100%;
+            }
+            #content nav form.show .form-input button {
+                width: 36px;
+                height: 100%;
+                border-radius: 0 36px 36px 0;
+                color: var(--light);
+                background: var(--red);
+            }
+
+            #content nav form.show ~ .notification,
+            #content nav form.show ~ .profile {
+                display: none;
+            }
+
+            .task-table {
+                font-size: 11px;
+            }
+
+            .task-table th,
+            .task-table td {
+                padding: 8px 4px;
+            }
+
+            .modal-content {
+                margin: 10% auto;
+                padding: 20px;
+            }
+
+            .pdf-statistics {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
+    <title>Production Task Management - Admin View</title>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<section id="sidebar">
+    <a href="#" class="brand">
+        <i class='bx bxs-factory'></i>
+        <span class="text">Operator Hub</span>
+    </a>
+
+    <ul class="side-menu top">
+        <li><a href="operator.html"><i class='bx bxs-dashboard'></i><span class="text">Dashboard</span></a></li>
+        <li><a href="opraw.html"><i class='bx bx-package'></i><span class="text">Raw Material</span></a></li>
+        <li><a href="opmat.html"><i class='bx bx-download'></i><span class="text">Material Intake</span></a></li>
+        <li><a href="opconsum.html"><i class='bx bx-upload'></i><span class="text">Material Consumption</span></a></li>
+        <li><a href="opstage.html"><i class='bx bx-git-branch'></i><span class="text">Production Stage</span></a></li>
+        <li class="active"><a href="oprtask.html"><i class='bx bx-task'></i><span class="text">Production Task</span></a></li>
+        <li><a href="oprbatch.html"><i class='bx bx-grid-alt'></i><span class="text">Production Batch</span></a></li>
+        <li><a href="opproduct.html"><i class='bx bx-cube'></i><span class="text">Product</span></a></li>
+        <li><a href="opqccheck.html"><i class='bx bx-check-shield'></i><span class="text">QC Checkpoint</span></a></li>
+        <li><a href="try.html"><i class='bx bxs-bar-chart-alt-2'></i><span class="text">Statistiques</span></a></li>
+    </ul>
+
+    <ul class="side-menu">
+        <li>
+            <a href="login.html" class="logout">
+                <i class='bx bxs-log-out-circle'></i>
+                <span class="text">Logout</span>
+            </a>
+        </li>
+    </ul>
+</section>
+<!-- SIDEBAR -->
+
+<!-- CONTENT -->
+<section id="content">
+    <!-- NAVBAR -->
+    <nav>
+        <i class='bx bx-menu'></i>
+        <a href="#" class="nav-link">Production Tasks</a>
+        <form action="#">
+            <div class="form-input">
+                <input type="search" placeholder="Search tasks...">
+                <button type="submit" class="search-btn"><i class='bx bx-search'></i></button>
+            </div>
+        </form>
+
+        <!-- User Profile Section -->
+        <div class="user-profile" id="userProfile">
+            <div class="user-avatar" id="userAvatar">A</div>
+            <div class="user-email" id="userEmail">admin@factory.com</div>
+        </div>
+
+        <input type="checkbox" id="switch-mode" hidden>
+        <label for="switch-mode" class="switch-mode"></label>
+    </nav>
+    <!-- NAVBAR -->
+
+    <!-- MAIN -->
+    <main>
+        <div class="head-title">
+            <div class="left">
+                <h1>Production Task Management</h1>
+                <ul class="breadcrumb">
+                    <li>
+                        <a href="#">Dashboard</a>
+                    </li>
+                    <li><i class='bx bx-chevron-right'></i></li>
+                    <li>
+                        <a class="active" href="#">Production Tasks</a>
+                    </li>
+                </ul>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-download" id="downloadBtn">
+                    <i class='bx bxs-cloud-download'></i>
+                    <span class="text" id="exportText">Download PDF</span>
+                    <span class="spinner" id="exportSpinner" style="display: none;"></span>
+                </button>
+                <button class="btn-download" id="createTaskBtn" style="background: #9C8C3A;">
+                    <i class='bx bx-plus'></i>
+                    <span class="text">Create Task</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="task-container">
+            <!-- Statistics Cards -->
+            <ul class="box-info">
+                <li>
+                    <i class='bx bx-task'></i>
+                    <span class="text">
+                        <h3 id="totalTasks">0</h3>
+                        <p>Total Tasks</p>
+                    </span>
+                </li>
+                <li>
+                    <i class='bx bx-loader-alt'></i>
+                    <span class="text">
+                        <h3 id="inProgressTasks">0</h3>
+                        <p>In Progress</p>
+                    </span>
+                </li>
+                <li>
+                    <i class='bx bx-check-circle'></i>
+                    <span class="text">
+                        <h3 id="completedTasks">0</h3>
+                        <p>Completed</p>
+                    </span>
+                </li>
+            </ul>
+
+            <!-- Efficiency Rating Summary -->
+            <div class="task-section">
+                <h3><i class='bx bx-line-chart'></i> Operator Efficiency Rating</h3>
+                <div class="efficiency-container" id="efficiencySummary">
+                    <div class="efficiency-card excellent">
+                        <i class='bx bx-star'></i>
+                        <div class="text">
+                            <h4 id="excellentCount">0</h4>
+                            <p>Excellent (On Time)</p>
+                        </div>
+                    </div>
+                    <div class="efficiency-card good">
+                        <i class='bx bx-time'></i>
+                        <div class="text">
+                            <h4 id="goodCount">0</h4>
+                            <p>Good (Within 50% over)</p>
+                        </div>
+                    </div>
+                    <div class="efficiency-card warning">
+                        <i class='bx bx-error'></i>
+                        <div class="text">
+                            <h4 id="warningCount">0</h4>
+                            <p>Warning (Up to 2x)</p>
+                        </div>
+                    </div>
+                    <div class="efficiency-card danger">
+                        <i class='bx bx-error-circle'></i>
+                        <div class="text">
+                            <h4 id="overdueCount">0</h4>
+                            <p>Overdue (>2x)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters Section -->
+            <div class="task-section">
+                <h3><i class='bx bx-filter'></i> Filter Tasks</h3>
+                <div class="filters">
+                    <select id="operatorFilter">
+                        <option value="">All Operators</option>
+                    </select>
+                    <select id="statusFilter">
+                        <option value="">All Status</option>
+                        <option value="PENDING">Pending</option>
+                        <option value="IN_PROGRESS">In Progress</option>
+                        <option value="COMPLETED">Completed</option>
+                    </select>
+                    <select id="ratingFilter">
+                        <option value="">All Ratings</option>
+                        <option value="EXCELLENT">Excellent (On Time)</option>
+                        <option value="GOOD">Good (Within 50% over)</option>
+                        <option value="WARNING">Warning (Up to 2x)</option>
+                        <option value="OVERDUE">Overdue (>2x)</option>
+                    </select>
+                    <input type="date" id="dateFrom" placeholder="From Date">
+                    <input type="date" id="dateTo" placeholder="To Date">
+                    <button class="btn btn-load" onclick="applyFilters()">
+                        <i class='bx bx-filter-alt'></i> Apply Filters
+                    </button>
+                    <button class="btn btn-load" onclick="clearFilters()" style="background: var(--dark-grey);">
+                        <i class='bx bx-reset'></i> Clear
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tasks Table -->
+            <div class="task-section">
+                <h3><i class='bx bx-list-check'></i> Production Tasks</h3>
+                <div style="overflow-x: auto;">
+                    <table class="task-table">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Operator</th>
+                            <th>Stage</th>
+                            <th>Batch Code</th>
+                            <th>Status</th>
+                            <th>Start Time</th>
+                            <th>End Time</th>
+                            <th>Duration</th>
+                            <th>Efficiency</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody id="taskTable">
+                        <tr>
+                            <td colspan="10">
+                                <div class="empty-state">
+                                    <i class='bx bx-info-circle'></i>
+                                    <h3>No Tasks Loaded</h3>
+                                    <p>Click the refresh button to load tasks</p>
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+    <!-- MAIN -->
+</section>
+<!-- CONTENT -->
+
+<!-- Create/Edit Task Modal -->
+<div id="taskModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalTitle">Create New Task</h2>
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+        </div>
+        <form id="taskForm">
+            <input type="hidden" id="taskId">
+
+            <div class="form-group">
+                <label for="operatorId">Operator *</label>
+                <select id="operatorId" required>
+                    <option value="">Select Operator</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="batchId">Production Batch *</label>
+                <select id="batchId" required>
+                    <option value="">Select Batch</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="stageId">Production Stage *</label>
+                <select id="stageId" required>
+                    <option value="">Select Stage</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="taskStatus">Status *</label>
+                <select id="taskStatus" required>
+                    <option value="PENDING">Pending</option>
+                    <option value="IN_PROGRESS">In Progress</option>
+                    <option value="COMPLETED">Completed</option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="startTime">Start Time</label>
+                    <input type="datetime-local" id="startTime">
+                </div>
+                <div class="form-group">
+                    <label for="endTime">End Time</label>
+                    <input type="datetime-local" id="endTime">
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn btn-save">Save Task</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Hidden PDF container -->
+<div id="pdf-container" style="display: none;">
+    <div class="pdf-header">
+        <div class="watermark">OPERATOR HUB - PRODUCTION TASKS</div>
+        <div style="text-align: center; margin-bottom: 15px;">
+            <img class="pdf-logo" id="pdf-logo" src="" alt="Company Logo" style="max-width: 200px; max-height: 80px;">
+        </div>
+        <h1 class="pdf-title">Operator Hub</h1>
+        <div class="pdf-subtitle">Production Task Management Report</div>
+        <div class="pdf-operator-info" id="pdf-operator-info"></div>
+        <div class="pdf-date" id="pdf-report-date"></div>
+        <div class="pdf-generated-by" id="pdf-generated-by"></div>
+    </div>
+
+    <div class="pdf-statistics" id="pdf-statistics">
+        <!-- Statistics will be filled by JavaScript -->
+    </div>
+
+    <table class="pdf-table" id="pdf-table">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Operator</th>
+            <th>Stage</th>
+            <th>Batch</th>
+            <th>Status</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+            <th>Duration</th>
+            <th>Rating</th>
+        </tr>
+        </thead>
+        <tbody id="pdf-table-body">
+        <!-- Table data will be filled by JavaScript -->
+        </tbody>
+    </table>
+
+    <div class="pdf-footer">
+        <p><strong>Operator Hub - Factory Management System</strong></p>
+        <p>This report contains confidential efficiency ratings. Unauthorized distribution is prohibited.</p>
+        <p>Report generated from Operator Hub System | This is an official document</p>
+    </div>
+</div>
+
+<script>
+    // ===== CONFIGURATION =====
+    const BASE_URL = "http://localhost:1010/api/v1";
+    const TASKS_URL = `${BASE_URL}/tasks`;
+    const USERS_URL = `${BASE_URL}/users`;
+    const BATCHES_URL = `${BASE_URL}/batches`;
+    const STAGES_URL = `${BASE_URL}/stages`;
+
+    const LOGO_PATH = 'cs.jpg';
+
+    // ===== GLOBAL VARIABLES =====
+    let allTasks = [];
+    let filteredTasks = [];
+    let operators = [];
+    let batches = [];
+    let stages = [];
+    let currentUser = null;
+    let tasksCache = [];
+    let logoImageData = null;
+    let logoLoaded = false;
+
+    // ===== DOM ELEMENTS =====
+    const downloadBtn = document.getElementById('downloadBtn');
+    const exportText = document.getElementById('exportText');
+    const exportSpinner = document.getElementById('exportSpinner');
+    const pdfLogo = document.getElementById('pdf-logo');
+    const createTaskBtn = document.getElementById('createTaskBtn');
+    const taskModal = document.getElementById('taskModal');
+    const taskForm = document.getElementById('taskForm');
+    const modalTitle = document.getElementById('modalTitle');
+
+    // ===== USER MANAGEMENT =====
+    function getCurrentUser() {
+        const savedUser = localStorage.getItem('currentUser');
+        if (savedUser) {
+            return JSON.parse(savedUser);
+        }
+
+        const defaultUser = {
+            id: 1,
+            name: "Admin User",
+            email: "admin@factory.com",
+            role: "admin",
+            avatarLetter: "A"
+        };
+
+        localStorage.setItem('currentUser', JSON.stringify(defaultUser));
+        return defaultUser;
+    }
+
+    function displayUserInfo() {
+        const user = getCurrentUser();
+        document.getElementById('userEmail').textContent = user.email;
+        document.getElementById('userAvatar').textContent = user.avatarLetter;
+
+        const userProfile = document.getElementById('userProfile');
+        userProfile.title = `${user.name}\n${user.email}\nRole: ${user.role}`;
+    }
+
+    // ===== DATE HANDLING FUNCTIONS =====
+    function formatDateForBackend(date) {
+        if (!date) return null;
+        try {
+            const d = new Date(date);
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            const hours = String(d.getHours()).padStart(2, '0');
+            const minutes = String(d.getMinutes()).padStart(2, '0');
+            const seconds = String(d.getSeconds()).padStart(2, '0');
+
+            return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+        } catch (e) {
+            console.error('Error formatting date for backend:', e);
+            return null;
+        }
+    }
+
+    function parseDateFromBackend(dateStr) {
+        if (!dateStr) return null;
+        try {
+            let cleanDate = dateStr;
+            if (dateStr.includes('.')) {
+                cleanDate = dateStr.split('.')[0];
+            }
+            cleanDate = cleanDate.replace(' ', 'T');
+            return new Date(cleanDate);
+        } catch (e) {
+            console.error('Error parsing date from backend:', e);
+            return null;
+        }
+    }
+
+    function formatDateTimeForDisplay(dateTimeStr) {
+        if (!dateTimeStr) return '-';
+        try {
+            const date = parseDateFromBackend(dateTimeStr);
+            if (!date || isNaN(date.getTime())) return '-';
+
+            return date.toLocaleString('en-US', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            });
+        } catch (e) {
+            console.error('Error formatting date for display:', e);
+            return '-';
+        }
+    }
+
+    function formatDateForInput(dateStr) {
+        if (!dateStr) return '';
+        try {
+            const date = parseDateFromBackend(dateStr);
+            if (!date || isNaN(date.getTime())) return '';
+
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
+        } catch (e) {
+            console.error('Error formatting date for input:', e);
+            return '';
+        }
+    }
+
+    function calculateDuration(startTime, endTime) {
+        if (!startTime || !endTime) return '-';
+
+        try {
+            const start = parseDateFromBackend(startTime);
+            const end = parseDateFromBackend(endTime);
+
+            if (!start || !end || isNaN(start.getTime()) || isNaN(end.getTime())) return '-';
+
+            const diffMs = end - start;
+            const diffHours = diffMs / (1000 * 60 * 60);
+            const diffDays = diffHours / 24;
+
+            if (diffDays >= 1) {
+                return `${diffDays.toFixed(1)} days`;
+            } else if (diffHours >= 1) {
+                return `${diffHours.toFixed(1)} hours`;
+            } else {
+                const diffMinutes = diffMs / (1000 * 60);
+                return `${diffMinutes.toFixed(0)} minutes`;
+            }
+        } catch (e) {
+            console.error('Error calculating duration:', e);
+            return '-';
+        }
+    }
+
+    // ===== EFFICIENCY RATING FUNCTIONS =====
+    function getStandardTaskDuration(task) {
+        const stageName = task.stage?.name || task.stage || 'Default';
+
+        const stageDurations = {
+            'Mixing': 1,
+            'Cutting': 2,
+            'Assembly': 3,
+            'Packaging': 1,
+            'Quality Check': 2,
+            'Phone': 2,
+            'Default': 2
+        };
+
+        return stageDurations[stageName] || stageDurations['Default'];
+    }
+
+    function calculateEfficiencyRating(task) {
+        if (task.status !== 'COMPLETED' || !task.startTime || !task.endTime) {
+            return null;
+        }
+
+        try {
+            const startTime = parseDateFromBackend(task.startTime);
+            const endTime = parseDateFromBackend(task.endTime);
+
+            if (!startTime || !endTime || isNaN(startTime.getTime()) || isNaN(endTime.getTime())) {
+                return null;
+            }
+
+            const standardDays = getStandardTaskDuration(task);
+
+            const durationMs = endTime - startTime;
+            const durationDays = durationMs / (1000 * 60 * 60 * 24);
+
+            const ratio = durationDays / standardDays;
+
+            if (ratio <= 1.0) {
+                return {
+                    rating: 'EXCELLENT',
+                    message: 'On time',
+                    color: 'excellent',
+                    icon: 'bx bx-star',
+                    duration: durationDays.toFixed(1)
+                };
+            } else if (ratio <= 2) {
+                return {
+                    rating: 'GOOD',
+                    message: 'Within 50% over',
+                    color: 'good',
+                    icon: 'bx bx-time',
+                    duration: durationDays.toFixed(1)
+                };
+            } else if (ratio <= 3.0) {
+                return {
+                    rating: 'WARNING',
+                    message: 'Up to 2x time',
+                    color: 'warning',
+                    icon: 'bx bx-error',
+                    duration: durationDays.toFixed(1)
+                };
+            } else {
+                return {
+                    rating: 'OVERDUE',
+                    message: 'Over 2x time',
+                    color: 'danger',
+                    icon: 'bx bx-error-circle',
+                    duration: durationDays.toFixed(1)
+                };
+            }
+        } catch (e) {
+            console.error('Error calculating rating:', e);
+            return null;
+        }
+    }
+
+    function getRatingBadge(task) {
+        const rating = calculateEfficiencyRating(task);
+        if (!rating) {
+            return '<span style="color: var(--dark-grey);">-</span>';
+        }
+
+        return `
+            <span class="rating-badge rating-${rating.rating}">
+                <i class='${rating.icon}'></i>
+                ${rating.rating} (${rating.duration}d)
+            </span>
+        `;
+    }
+
+    function getBatchCode(task) {
+        if (task.productionBatch) {
+            if (typeof task.productionBatch === 'object') {
+                return task.productionBatch.batchCode ||
+                       task.productionBatch.batchNumber ||
+                       task.productionBatch.code ||
+                       task.productionBatch.name ||
+                       '-';
+            }
+            return task.productionBatch;
+        }
+        if (task.batch) {
+            if (typeof task.batch === 'object') {
+                return task.batch.batchCode ||
+                       task.batch.batchNumber ||
+                       task.batch.code ||
+                       task.batch.name ||
+                       '-';
+            }
+            return task.batch;
+        }
+        if (task.batchCode) return task.batchCode;
+        if (task.batchNumber) return task.batchNumber;
+        return '-';
+    }
+
+    function getStageName(task) {
+        if (task.stage) {
+            if (typeof task.stage === 'object') {
+                return task.stage.name || task.stage.stageName || '-';
+            }
+            return task.stage;
+        }
+        if (task.stageName) return task.stageName;
+        return '-';
+    }
+
+    function getOperatorName(task) {
+        if (task.assignedTo) {
+            if (typeof task.assignedTo === 'object') {
+                return task.assignedTo.name || task.assignedTo.username || task.assignedTo.email || '-';
+            }
+            const operator = operators.find(op => op.id == task.assignedTo);
+            return operator ? (operator.name || operator.username || operator.email) : task.assignedTo;
+        }
+        return '-';
+    }
+
+    // ===== API FUNCTIONS =====
+    async function loadOperators() {
+        try {
+            const response = await fetch(`${USERS_URL}?role=operator`);
+            if (!response.ok) throw new Error('Failed to load operators');
+            operators = await response.json();
+
+            const operatorFilter = document.getElementById('operatorFilter');
+            const operatorSelect = document.getElementById('operatorId');
+
+            operatorFilter.innerHTML = '<option value="">All Operators</option>';
+            operatorSelect.innerHTML = '<option value="">Select Operator</option>';
+
+            operators.forEach(op => {
+                const option = `<option value="${op.id}">${op.name || op.username || op.email}</option>`;
+                operatorFilter.innerHTML += option;
+                operatorSelect.innerHTML += option;
+            });
+        } catch (error) {
+            console.error('Error loading operators:', error);
+        }
+    }
+
+    async function loadBatches() {
+        try {
+            const response = await fetch(BATCHES_URL);
+            if (!response.ok) throw new Error('Failed to load batches');
+            batches = await response.json();
+
+            const batchSelect = document.getElementById('batchId');
+            batchSelect.innerHTML = '<option value="">Select Batch</option>';
+
+            batches.forEach(batch => {
+                batchSelect.innerHTML += `<option value="${batch.id}">${batch.batchCode || batch.batchNumber || batch.name || `Batch ${batch.id}`}</option>`;
+            });
+        } catch (error) {
+            console.error('Error loading batches:', error);
+        }
+    }
+
+    async function loadStages() {
+        try {
+            const response = await fetch(STAGES_URL);
+            if (!response.ok) throw new Error('Failed to load stages');
+            stages = await response.json();
+
+            const stageSelect = document.getElementById('stageId');
+            stageSelect.innerHTML = '<option value="">Select Stage</option>';
+
+            stages.forEach(stage => {
+                stageSelect.innerHTML += `<option value="${stage.id}">${stage.name || stage.stageName || `Stage ${stage.id}`}</option>`;
+            });
+        } catch (error) {
+            console.error('Error loading stages:', error);
+        }
+    }
+
+    async function loadAllTasks() {
+        try {
+            const response = await fetch(TASKS_URL);
+            if (!response.ok) throw new Error('Failed to fetch tasks');
+            allTasks = await response.json();
+            tasksCache = allTasks;
+            filteredTasks = [...allTasks];
+            updateStatistics();
+            updateEfficiencySummary();
+            renderTasks();
+            showNotification(`Loaded ${allTasks.length} tasks`, 'success');
+        } catch (error) {
+            console.error('Error loading tasks:', error);
+            showNotification('Error loading tasks', 'error');
+
+            document.getElementById('taskTable').innerHTML = `
+                <tr>
+                    <td colspan="10">
+                        <div class="error-state">
+                            <i class='bx bx-error'></i>
+                            <h3>Error Loading Tasks</h3>
+                            <p>${error.message}</p>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }
+    }
+
+    function updateStatistics() {
+        const totalTasks = filteredTasks.length;
+        const inProgressTasks = filteredTasks.filter(t => t.status === "IN_PROGRESS").length;
+        const completedTasks = filteredTasks.filter(t => t.status === "COMPLETED").length;
+
+        document.getElementById('totalTasks').textContent = totalTasks;
+        document.getElementById('inProgressTasks').textContent = inProgressTasks;
+        document.getElementById('completedTasks').textContent = completedTasks;
+    }
+
+    function updateEfficiencySummary() {
+        const completedTasks = filteredTasks.filter(t => t.status === 'COMPLETED' && t.startTime && t.endTime);
+
+        let excellent = 0, good = 0, warning = 0, overdue = 0;
+
+        completedTasks.forEach(task => {
+            const rating = calculateEfficiencyRating(task);
+            if (rating) {
+                switch(rating.rating) {
+                    case 'EXCELLENT': excellent++; break;
+                    case 'GOOD': good++; break;
+                    case 'WARNING': warning++; break;
+                    case 'OVERDUE': overdue++; break;
+                }
+            }
+        });
+
+        document.getElementById('excellentCount').textContent = excellent;
+        document.getElementById('goodCount').textContent = good;
+        document.getElementById('warningCount').textContent = warning;
+        document.getElementById('overdueCount').textContent = overdue;
+    }
+
+    function applyFilters() {
+        const operatorId = document.getElementById('operatorFilter').value;
+        const status = document.getElementById('statusFilter').value;
+        const rating = document.getElementById('ratingFilter').value;
+        const dateFrom = document.getElementById('dateFrom').value;
+        const dateTo = document.getElementById('dateTo').value;
+
+        filteredTasks = allTasks.filter(task => {
+            // Operator filter
+            if (operatorId) {
+                const taskOperatorId = task.assignedTo?.id || task.assignedTo;
+                if (taskOperatorId != operatorId) return false;
+            }
+
+            // Status filter
+            if (status && task.status !== status) return false;
+
+            // Rating filter
+            if (rating) {
+                const taskRating = calculateEfficiencyRating(task);
+                if (!taskRating || taskRating.rating !== rating) return false;
+            }
+
+            // Date range filter
+            if (dateFrom) {
+                const taskDate = task.startTime ? parseDateFromBackend(task.startTime) : null;
+                if (taskDate && taskDate < new Date(dateFrom)) return false;
+            }
+            if (dateTo) {
+                const taskDate = task.endTime ? parseDateFromBackend(task.endTime) : null;
+                if (taskDate) {
+                    const endDate = new Date(dateTo);
+                    endDate.setHours(23, 59, 59, 999);
+                    if (taskDate > endDate) return false;
+                }
+            }
+
+            return true;
+        });
+
+        renderTasks();
+        updateStatistics();
+        updateEfficiencySummary();
+        showNotification(`Found ${filteredTasks.length} tasks`, 'success');
+    }
+
+    function clearFilters() {
+        document.getElementById('operatorFilter').value = '';
+        document.getElementById('statusFilter').value = '';
+        document.getElementById('ratingFilter').value = '';
+        document.getElementById('dateFrom').value = '';
+        document.getElementById('dateTo').value = '';
+
+        filteredTasks = [...allTasks];
+        renderTasks();
+        updateStatistics();
+        updateEfficiencySummary();
+    }
+
+    function renderTasks() {
+        const tbody = document.getElementById("taskTable");
+
+        if (!filteredTasks || filteredTasks.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="10">
+                        <div class="empty-state">
+                            <i class='bx bx-task-x'></i>
+                            <h3>No Tasks Found</h3>
+                            <p>No tasks match the selected filters</p>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        tbody.innerHTML = "";
+        filteredTasks.forEach(task => {
+            const rating = calculateEfficiencyRating(task);
+            const duration = calculateDuration(task.startTime, task.endTime);
+            const row = document.createElement('tr');
+
+            row.innerHTML = `
+                <td><strong>${task.id || '-'}</strong></td>
+                <td>${getOperatorName(task)}</td>
+                <td>${getStageName(task)}</td>
+                <td>${getBatchCode(task)}</td>
+                <td><span class="status-badge status-${task.status || 'PENDING'}">${task.status || 'PENDING'}</span></td>
+                <td>${formatDateTimeForDisplay(task.startTime)}</td>
+                <td>${formatDateTimeForDisplay(task.endTime)}</td>
+                <td>${duration}</td>
+                <td>${rating ? getRatingBadge(task) : '-'}</td>
+                <td>${adminActionButtons(task)}</td>
+            `;
+
+            tbody.appendChild(row);
+        });
+    }
+
+    function adminActionButtons(task) {
+        return `
+            <div style="display: flex; gap: 5px;">
+                <button class="btn btn-start" onclick="editTask(${task.id})" title="Edit Task">
+                    <i class='bx bx-edit'></i>
+                </button>
+                <button class="btn btn-delete" onclick="deleteTask(${task.id})" title="Delete Task">
+                    <i class='bx bx-trash'></i>
+                </button>
+            </div>
+        `;
+    }
+
+    // ===== TASK CRUD OPERATIONS =====
+    function openModal(task = null) {
+        if (task) {
+            modalTitle.textContent = 'Edit Task';
+            document.getElementById('taskId').value = task.id;
+            document.getElementById('operatorId').value = task.assignedTo?.id || task.assignedTo || '';
+            document.getElementById('batchId').value = task.productionBatch?.id || task.batch?.id || '';
+            document.getElementById('stageId').value = task.stage?.id || '';
+            document.getElementById('taskStatus').value = task.status || 'PENDING';
+            document.getElementById('startTime').value = formatDateForInput(task.startTime);
+            document.getElementById('endTime').value = formatDateForInput(task.endTime);
+        } else {
+            modalTitle.textContent = 'Create New Task';
+            document.getElementById('taskId').value = '';
+            taskForm.reset();
+        }
+        taskModal.style.display = 'block';
+    }
+
+    function closeModal() {
+        taskModal.style.display = 'none';
+        taskForm.reset();
+    }
+
+    async function editTask(id) {
+        try {
+            const task = allTasks.find(t => t.id === id);
+            if (!task) throw new Error('Task not found');
+
+            // Ensure dropdowns are populated
+            if (operators.length === 0) await loadOperators();
+            if (batches.length === 0) await loadBatches();
+            if (stages.length === 0) await loadStages();
+
+            openModal(task);
+        } catch (error) {
+            console.error('Error editing task:', error);
+            showNotification('Error loading task details', 'error');
+        }
+    }
+
+    async function deleteTask(id) {
+        if (!confirm('Are you sure you want to delete this task?')) return;
+
+        try {
+            const response = await fetch(`${TASKS_URL}/${id}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) throw new Error('Failed to delete task');
+
+            showNotification('Task deleted successfully', 'success');
+            loadAllTasks();
+        } catch (error) {
+            console.error('Error deleting task:', error);
+            showNotification('Error deleting task', 'error');
+        }
+    }
+
+    taskForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const taskId = document.getElementById('taskId').value;
+        const isEditing = !!taskId;
+
+        const formData = {
+            productionBatchId: parseInt(document.getElementById('batchId').value),
+            stageId: parseInt(document.getElementById('stageId').value),
+            assignedToId: parseInt(document.getElementById('operatorId').value),
+            status: document.getElementById('taskStatus').value
+        };
+
+        // Add dates if provided
+        const startTime = document.getElementById('startTime').value;
+        const endTime = document.getElementById('endTime').value;
+
+        if (startTime) {
+            formData.startTime = formatDateForBackend(startTime);
+        }
+        if (endTime) {
+            formData.endTime = formatDateForBackend(endTime);
+        }
+
+        try {
+            const url = isEditing ? `${TASKS_URL}/${taskId}` : TASKS_URL;
+            const method = isEditing ? 'PUT' : 'POST';
+
+            const response = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || 'Failed to save task');
+            }
+
+            showNotification(`Task ${isEditing ? 'updated' : 'created'} successfully`, 'success');
+            closeModal();
+            loadAllTasks();
+        } catch (error) {
+            console.error('Error saving task:', error);
+            showNotification('Error saving task: ' + error.message, 'error');
+        }
+    });
+
+    // ===== PDF DOWNLOAD FUNCTIONALITY =====
+    function preloadAndConvertLogo() {
+        const img = new Image();
+        img.crossOrigin = "Anonymous";
+        img.src = LOGO_PATH + '?t=' + new Date().getTime();
+
+        img.onload = function() {
+            console.log('Logo loaded successfully');
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+            logoImageData = canvas.toDataURL('image/jpeg');
+            logoLoaded = true;
+            pdfLogo.src = logoImageData;
+        };
+
+        img.onerror = function() {
+            console.log('Using fallback logo');
+            useFallbackLogo();
+        };
+    }
+
+    function useFallbackLogo() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 200;
+        canvas.height = 80;
+        const ctx = canvas.getContext('2d');
+
+        ctx.fillStyle = '#2D4F2B';
+        ctx.fillRect(0, 0, 200, 80);
+
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'bold 24px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('OPERATOR', 100, 30);
+        ctx.font = '16px Arial';
+        ctx.fillText('HUB', 100, 55);
+
+        logoImageData = canvas.toDataURL('image/png');
+        logoLoaded = true;
+        pdfLogo.src = logoImageData;
+    }
+
+    function preparePDFContent(tasks, operatorInfo) {
+        const now = new Date();
+        document.getElementById('pdf-report-date').textContent = `Report generated on: ${now.toLocaleString()}`;
+
+        const userName = currentUser?.name || 'Admin';
+        document.getElementById('pdf-generated-by').textContent = `Generated by: ${userName}`;
+
+        const operatorText = operatorInfo ? `Filtered by: ${operatorInfo}` : 'All Operators';
+        document.getElementById('pdf-operator-info').textContent = operatorText;
+
+        if (logoImageData) {
+            pdfLogo.src = logoImageData;
+        }
+
+        const totalTasks = tasks.length;
+        const pendingTasks = tasks.filter(t => t.status === 'PENDING').length;
+        const inProgressTasks = tasks.filter(t => t.status === 'IN_PROGRESS').length;
+        const completedTasks = tasks.filter(t => t.status === 'COMPLETED').length;
+
+        document.getElementById('pdf-statistics').innerHTML = `
+            <div class="stat-box"><div class="stat-value">${totalTasks}</div><div class="stat-label">Total</div></div>
+            <div class="stat-box"><div class="stat-value">${pendingTasks}</div><div class="stat-label">Pending</div></div>
+            <div class="stat-box"><div class="stat-value">${inProgressTasks}</div><div class="stat-label">In Progress</div></div>
+            <div class="stat-box"><div class="stat-value">${completedTasks}</div><div class="stat-label">Completed</div></div>
+        `;
+
+        const tableBody = document.getElementById('pdf-table-body');
+        tableBody.innerHTML = '';
+
+        if (tasks.length === 0) {
+            const row = document.createElement('tr');
+            row.innerHTML = '<td colspan="9" style="text-align:center; padding:20px;">No tasks found</td>';
+            tableBody.appendChild(row);
+        } else {
+            tasks.forEach(task => {
+                const row = document.createElement('tr');
+                const rating = calculateEfficiencyRating(task);
+                const ratingText = rating ? `${rating.rating} (${rating.duration}d)` : '-';
+                const duration = calculateDuration(task.startTime, task.endTime);
+
+                row.innerHTML = `
+                    <td>${task.id || '-'}</td>
+                    <td>${getOperatorName(task)}</td>
+                    <td>${getStageName(task)}</td>
+                    <td>${getBatchCode(task)}</td>
+                    <td>${task.status || '-'}</td>
+                    <td>${formatDateTimeForDisplay(task.startTime)}</td>
+                    <td>${formatDateTimeForDisplay(task.endTime)}</td>
+                    <td>${duration}</td>
+                    <td>${ratingText}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+    }
+
+    async function generatePDFReport() {
+        try {
+            const operatorId = document.getElementById('operatorFilter').value;
+            const operatorName = operatorId ?
+                operators.find(op => op.id == operatorId)?.name || operators.find(op => op.id == operatorId)?.username || `Operator ${operatorId}` :
+                'All Operators';
+
+            const tasksToExport = operatorId ?
+                allTasks.filter(t => (t.assignedTo?.id || t.assignedTo) == operatorId) :
+                allTasks;
+
+            if (tasksToExport.length === 0) {
+                showNotification('No tasks to export', 'error');
+                return;
+            }
+
+            exportText.textContent = 'Generating...';
+            exportSpinner.style.display = 'inline-block';
+            downloadBtn.disabled = true;
+
+            preparePDFContent(tasksToExport, operatorName);
+
+            if (!logoLoaded) {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+
+            const pdfContainer = document.getElementById('pdf-container');
+            pdfContainer.style.display = 'block';
+            pdfContainer.style.position = 'absolute';
+            pdfContainer.style.top = '0';
+            pdfContainer.style.left = '0';
+
+            const canvas = await html2canvas(pdfContainer, {
+                scale: 2,
+                backgroundColor: '#ffffff'
+            });
+
+            pdfContainer.style.display = 'none';
+            pdfContainer.style.position = 'fixed';
+            pdfContainer.style.top = '-9999px';
+            pdfContainer.style.left = '-9999px';
+
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'mm', 'a4');
+
+            const imgData = canvas.toDataURL('image/png');
+            const imgWidth = 210;
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+            pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+
+            const operatorSuffix = operatorId ? `_${operatorName.replace(/\s+/g, '_')}` : '';
+            const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+            pdf.save(`Tasks_Report${operatorSuffix}_${timestamp}.pdf`);
+
+            exportText.textContent = 'Download PDF';
+            exportSpinner.style.display = 'none';
+            downloadBtn.disabled = false;
+
+            showNotification('PDF report downloaded successfully!', 'success');
+
+        } catch (error) {
+            console.error('Error:', error);
+            showNotification('Error generating PDF report', 'error');
+            exportText.textContent = 'Download PDF';
+            exportSpinner.style.display = 'none';
+            downloadBtn.disabled = false;
+        }
+    }
+
+    // ===== UTILITY FUNCTIONS =====
+    function showNotification(message, type) {
+        const existingNotif = document.querySelector('.notification');
+        if (existingNotif) existingNotif.remove();
+
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.innerHTML = `
+            <i class='bx ${type === 'success' ? 'bx-check-circle' : 'bx-error-circle'}'></i>
+            <span>${message}</span>
+        `;
+
+        document.body.appendChild(notification);
+        setTimeout(() => {
+            notification.style.animation = 'slideOutRight 0.3s ease';
+            setTimeout(() => notification.remove(), 300);
+        }, 4000);
+    }
+
+    // ===== EVENT LISTENERS =====
+    document.querySelectorAll('#sidebar .side-menu.top li a').forEach(item => {
+        const li = item.parentElement;
+        item.addEventListener('click', function () {
+            document.querySelectorAll('#sidebar .side-menu.top li').forEach(i => i.classList.remove('active'));
+            li.classList.add('active');
+        });
+    });
+
+    document.querySelector('#content nav .bx.bx-menu').addEventListener('click', function () {
+        document.getElementById('sidebar').classList.toggle('hide');
+    });
+
+    document.getElementById('switch-mode').addEventListener('change', function () {
+        document.body.classList.toggle('dark', this.checked);
+    });
+
+    document.getElementById('userProfile').addEventListener('click', function() {
+        const user = getCurrentUser();
+        alert(`User: ${user.name}\nEmail: ${user.email}\nRole: ${user.role}`);
+    });
+
+    // Close modal when clicking outside
+    window.addEventListener('click', (e) => {
+        if (e.target === taskModal) {
+            closeModal();
+        }
+    });
+
+    createTaskBtn.addEventListener('click', async () => {
+        await Promise.all([loadOperators(), loadBatches(), loadStages()]);
+        openModal();
+    });
+
+    downloadBtn.addEventListener('click', generatePDFReport);
+
+    // ===== INITIALIZATION =====
+    async function init() {
+        currentUser = getCurrentUser();
+        displayUserInfo();
+
+        preloadAndConvertLogo();
+
+        // Load all required data
+        await Promise.all([
+            loadOperators(),
+            loadBatches(),
+            loadStages()
+        ]);
+
+        await loadAllTasks();
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+</script>
+
+</body>
+</html>
