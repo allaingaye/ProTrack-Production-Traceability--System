@@ -3,7 +3,7 @@
 ## 📌 Introduction
 ProTrack is an integrated software solution designed to automate production workflows and enhance the traceability of products within manufacturing environments. Developed for the **Compagnie Sucrière du Tchad (CST)**, the system supports process optimization, real‑time monitoring, and quality assurance by providing end‑to‑end tracking from raw material intake to final product dispatch.
 
----
+
 
 ## 🎯 General Objective
 To develop a digital system that automates production operations and tracks product movement throughout the supply chain, ensuring quality, transparency, and efficiency.
@@ -18,7 +18,7 @@ To develop a digital system that automates production operations and tracks prod
 - Provide quality control checkpoints with data entry and feedback  
 - Support audit trails for compliance and operational visibility  
 
----
+
 
 ## 📚 Scope
 **Included:**
@@ -32,7 +32,7 @@ To develop a digital system that automates production operations and tracks prod
 - Hardware integration with physical machines (e.g., sensors, IoT devices)  
 - Direct automation of physical machinery  
 
----
+
 
 ## 🚀 Key Features
 - **Production Workflow Module** – Digitally maps each stage of production and assigns task roles  
@@ -42,7 +42,7 @@ To develop a digital system that automates production operations and tracks prod
 - **Reporting & Analytics Dashboard** – Tracks production efficiency, downtime, and bottlenecks  
 - **Audit Logs & Data Exports** – All activities recorded with timestamps for traceability and compliance  
 
----
+
 
 ## 📈 Expected Outcomes
 - **Optimized Production Efficiency** – Automation reduces manual errors and bottlenecks, improving overall output  
@@ -51,7 +51,7 @@ To develop a digital system that automates production operations and tracks prod
 - **Data‑Driven Decision Making** – Management can assess performance and plan improvements based on real‑time data  
 - **Scalable System** – Adaptable to other production lines or expandable for warehouse integration  
 
----
+
 
 ## 🛠️ Tech Stack
 **Backend**
