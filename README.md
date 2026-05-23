@@ -1,16 +1,16 @@
 # ProTrack – Production Process Automation and Product Traceability System
 
-## 📌 Introduction
+##  Introduction
 ProTrack is an integrated software solution designed to automate production workflows and enhance the traceability of products within manufacturing environments. Developed for the **Compagnie Sucrière du Tchad (CST)**, the system supports process optimization, real‑time monitoring, and quality assurance by providing end‑to‑end tracking from raw material intake to final product dispatch.
 
 
 
-## 🎯 General Objective
+##  General Objective
 To develop a digital system that automates production operations and tracks product movement throughout the supply chain, ensuring quality, transparency, and efficiency.
 
 
 
-## 🎯 Specific Objectives
+##  Specific Objectives
 - Automate task scheduling and process logging within the production line  
 - Track raw materials from entry through each processing stage to final product output  
 - Assign and trace batch numbers and QR/barcodes for traceability  
@@ -20,7 +20,7 @@ To develop a digital system that automates production operations and tracks prod
 
 
 
-## 📚 Scope
+##  Scope
 **Included:**
 - Digital dashboards for production workflow visualization  
 - Inventory and raw material tracking  
@@ -34,7 +34,7 @@ To develop a digital system that automates production operations and tracks prod
 
 
 
-## 🚀 Key Features
+##  Key Features
 - **Production Workflow Module** – Digitally maps each stage of production and assigns task roles  
 - **Inventory & Input Tracking** – Logs material quantities, sources, and consumption rates  
 - **Traceability Engine** – Assigns traceable IDs (batch numbers/QR codes) for each production unit  
@@ -44,7 +44,7 @@ To develop a digital system that automates production operations and tracks prod
 
 
 
-## 📈 Expected Outcomes
+## Expected Outcomes
 - **Optimized Production Efficiency** – Automation reduces manual errors and bottlenecks, improving overall output  
 - **Enhanced Product Traceability** – Complete visibility from raw materials to final product improves quality assurance and accountability  
 - **Better Compliance & Reporting** – Accurate records support audits, certifications, and industry standards  
@@ -53,7 +53,7 @@ To develop a digital system that automates production operations and tracks prod
 
 
 
-## 🛠️ Tech Stack
+##  Tech Stack
 **Backend**
 - Java (Spring Boot, Hibernate ORM)  
 - PostgreSQL (pgAdmin for management)  
