@@ -57,7 +57,8 @@ To develop a digital system that automates production operations and tracks prod
 **Backend**
 - Java (Spring Boot, Hibernate ORM)  
 - PostgreSQL (pgAdmin for management)  
-- REST API integration  
+- REST API integration
+- OTP verification for security
 
 **Frontend**
 - HTML5, CSS3, Vanilla JavaScript  
