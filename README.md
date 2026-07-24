@@ -59,6 +59,7 @@ To develop a digital system that automates production operations and tracks prod
 - PostgreSQL (pgAdmin for management)  
 - REST API integration
 - OTP verification for security
+- ORM hibernate
 
 **Frontend**
 - HTML5, CSS3, Vanilla JavaScript  
