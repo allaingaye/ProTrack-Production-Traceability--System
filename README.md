@@ -26,7 +26,7 @@ To develop a digital system that automates production operations and tracks prod
 - Inventory and raw material tracking  
 - Batch identification and traceability tools (QR/barcode support)  
 - Production reporting and analytics module  
-- User roles for operators, quality controllers, and management  
+- User roles for Admin, operators and  quality controllers  
 
 **Excluded:**
 - Hardware integration with physical machines (e.g., sensors, IoT devices)  
@@ -74,5 +74,13 @@ To develop a digital system that automates production operations and tracks prod
 **Tools**
 - Git & GitHub for version control  
 - IntelliJ IDEA for backend development  
-- pgAdmin for database management  
+- pgAdmin for database management
+
+
+  ## 🚀 Getting Started
+1. Clone the repository  
+2. Configure PostgreSQL database in `application.properties`  
+3. Run backend with Spring Boot (`mvn spring-boot:run`)  
+4. Open `index.html` in browser for frontend  
+
 .
