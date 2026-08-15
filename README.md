@@ -61,6 +61,21 @@ To develop a digital system that automates production operations and tracks prod
 - OTP verification for security
 - Hibernate ORM
 
+
+## 🔐 Role-Based Access Control
+ProTrack implements RBAC to secure system modules and enforce accountability.
+
+- Admin: Manage users, workflows, and reports  
+- Operator: Execute production tasks and log materials  
+- Quality Controller: Perform inspections and record QC data
+- 
+**Authorization Flow:**
+1. User signs in with OTP verification  
+2. JWT token issued with embedded role claims  
+3. Spring Security middleware validates role before granting access
+
+
+
 **Frontend**
 - HTML5, CSS3, Vanilla JavaScript  
 - Responsive Design (Flexbox, Media Queries)  
@@ -80,7 +95,7 @@ To develop a digital system that automates production operations and tracks prod
   ## 🚀 Getting Started
 1. Clone the repository
 `bash
-   git clone https://github.com/your-username/protrack.git
+ git clone https://github.com/allaingaye/ProTrack-Production-Traceability--System.git
 3. Configure PostgreSQL database in `application.properties`  
 4. Run backend with Spring Boot (`mvn spring-boot:run`)  
 5. Open `index.html` in browser for frontend  
