@@ -78,9 +78,11 @@ To develop a digital system that automates production operations and tracks prod
 
 
   ## 🚀 Getting Started
-1. Clone the repository  
-2. Configure PostgreSQL database in `application.properties`  
-3. Run backend with Spring Boot (`mvn spring-boot:run`)  
-4. Open `index.html` in browser for frontend  
+1. Clone the repository
+`bash
+   git clone https://github.com/your-username/protrack.git
+3. Configure PostgreSQL database in `application.properties`  
+4. Run backend with Spring Boot (`mvn spring-boot:run`)  
+5. Open `index.html` in browser for frontend  
 
 .
