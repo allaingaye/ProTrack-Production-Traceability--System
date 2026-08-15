@@ -62,7 +62,7 @@ To develop a digital system that automates production operations and tracks prod
 - Hibernate ORM
 
 
-## 🔐 Role-Based Access Control
+##  Role-Based Access Control
 ProTrack implements RBAC to secure system modules and enforce accountability.
 
 - Admin: Manage users, workflows, and reports  
@@ -92,7 +92,7 @@ ProTrack implements RBAC to secure system modules and enforce accountability.
 - pgAdmin for database management
 
 
-  ## 🚀 Getting Started
+  ##  Getting Started
 1. Clone the repository
 `bash
  git clone https://github.com/allaingaye/ProTrack-Production-Traceability--System.git
