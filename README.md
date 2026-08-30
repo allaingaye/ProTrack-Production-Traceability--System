@@ -49,7 +49,7 @@ To develop a digital system that automates production operations and tracks prod
 - **Enhanced Product Traceability** – Complete visibility from raw materials to final product improves quality assurance and accountability  
 - **Better Compliance & Reporting** – Accurate records support audits, certifications, and industry standards  
 - **Data‑Driven Decision Making** – Management can assess performance and plan improvements based on real‑time data  
-- **Scalable System** – Adaptable to other production lines or expandable for warehouse integration  
+- **Scalable System** – Adaptable to other production line or expandable for warehouse integration  
 
 
 
@@ -83,7 +83,7 @@ ProTrack implements RBAC to secure system modules and enforce accountability.
 - LocalStorage for client‑side persistence  
 - DOM Manipulation & Event Listeners  
 - CSS Animations  
-- Boxicons for icons  
+- Boxicons for icons 
 - Google Fonts for typography  
 
 **Tools**
