@@ -98,6 +98,6 @@ ProTrack implements RBAC to secure system modules and enforce accountability.
  git clone https://github.com/allaingaye/ProTrack-Production-Traceability--System.git
 3. Configure PostgreSQL database in `application.properties`  
 4. Run backend with Spring Boot (`mvn spring-boot:run`)  
-5. Open `[index.html](http://localhost:1010/index.html)` in browser for frontend  
+5. Open `(http://localhost:1010/index.html)` in browser for frontend  
 
 .
